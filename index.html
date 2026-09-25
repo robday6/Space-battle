@@ -146,6 +146,10 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
 @keyframes rise{from{opacity:0; transform:translateY(14px) scale(.96)}to{opacity:1; transform:none}}
 .overlay{overflow-y:auto; z-index:2}
 .confetti{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:3}
+.rules{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; width:min(100%,560px)}
+.rules li{background:rgba(255,255,255,.08); border-radius:10px; padding:8px 12px; font:600 13px/1.35 var(--body); color:#EEF0FA; text-align:left; display:flex; gap:10px; align-items:center}
+.rules b{font:800 15px var(--mono); color:#FFC53D; flex:0 0 auto; letter-spacing:1px}
+@media (max-width:560px){ .rules{grid-template-columns:minmax(0,1fr)} .rules li{font-size:12px; padding:6px 10px} }
 .count-big{font:800 clamp(64px,14vw,150px)/1 var(--display); color:#FFC53D; animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
 .ptabs-label{margin:0; font:600 11px var(--body); text-transform:uppercase; letter-spacing:.12em; color:var(--muted)}
 .ptabs{display:flex; gap:6px; overflow-x:auto; padding:2px 2px 6px; scrollbar-width:thin; max-width:100%}
@@ -341,7 +345,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
     mount(el, opts = {}){
       const guest = opts.fight || null;
       el.innerHTML = `
-        <div><p class="eyebrow">Last ship flying</p><h2>Space battle</h2><p class="lede">${guest ? `${guest.names.length} pilots, three rounds. Each round's winner sits out the next, and the three winners are revealed at the end. Everyone with this link watches exactly the same battle.` : 'Every name gets a ship with three shields. They steer and fire at random, asteroids get in the way, and the last one flying wins the round. There are three rounds, and each winner sits out the rounds after, so you end up with three different winners. Share it and everyone who opens the link watches the identical battle.'}</p></div>
+        <div><p class="eyebrow">Last ship flying</p><h2>Space battle</h2><p class="lede">${guest ? `${guest.names.length} pilots, three lives each, three rounds. Each round's winner sits out the next, and the three winners are revealed at the end. Everyone with this link watches exactly the same battle.` : 'Every name gets a ship with three lives. They steer and fire at random, asteroids get in the way, and the last one flying wins the round. There are three rounds, and each winner sits out the rounds after, so you end up with three different winners. Share it and everyone who opens the link watches the identical battle.'}</p></div>
         <div class="row">
           <button class="btn" id="bstart" type="button">Watch in full screen</button>
           <button class="btn ghost" id="bhere" type="button">Watch here</button>
@@ -397,19 +401,40 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
         const n = order.length, off = Math.floor(R() * U);
         ships = order.map((name, i) => { const k = ix(off + i * U / n);
           return {name, color: colorOf(name), x: W / 2 + COS[k] * W * .36, y: H / 2 + SIN[k] * H * .36, a: R() * U, vx: 0, vy: 0, hp: 3, turn: 0, turnT: 0, thrustT: 0, fireT: .5 + R() * 1.5, inv: 1, flash: 0, alive: true, kills: 0}; });
-        bullets = []; parts = []; outs = []; t = 0; over = false; acc = 0;
+        bullets = []; parts = []; outs = []; t = 0; over = false; acc = 0; rings = []; debris = []; floaters = []; shake = 0; flashA = 0;
         rocks = Array.from({length: 4}, () => makeRock(W / 2 + (R() - .5) * 120, H / 2 + (R() - .5) * 80, 30 + R() * 20));
         ticker.textContent = ''; renderSide(); draw();
       };
+      let rings = [], debris = [], floaters = [], shake = 0, flashA = 0;
+      const addShake = v => { if (!reduced) shake = Math.min(18, shake + v); };
+      const spark = (x, y, color, n, sMin, sMax, lMin, lMax, size) => { for (let i = 0; i < n; i++) { const a = V() * TAU, sp = sMin + V() * (sMax - sMin); parts.push({x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: lMin + V() * (lMax - lMin), max: lMax, color, size: size * (.6 + V() * .8), glow: true}); } };
+      const fxHit = s => {
+        spark(s.x, s.y, s.color, 22, 80, 320, .25, .7, 3.2); spark(s.x, s.y, '#FFFFFF', 10, 120, 380, .15, .35, 2.4);
+        rings.push({x: s.x, y: s.y, r: 8, max: 46, life: .35, full: .35, color: '#FFFFFF', w: 3});
+        floaters.push({x: s.x, y: s.y - 30, txt: s.hp > 0 ? `−1 life` : 'OUT!', color: s.hp > 0 ? '#FFC53D' : '#FF4D4D', life: 1.1, full: 1.1, big: s.hp <= 0});
+        addShake(4);
+      };
+      const fxKO = s => {
+        spark(s.x, s.y, s.color, 70, 60, 460, .5, 1.4, 4); spark(s.x, s.y, '#FFFFFF', 30, 150, 520, .2, .6, 3); spark(s.x, s.y, '#FFC53D', 26, 40, 260, .4, 1, 3.5);
+        rings.push({x: s.x, y: s.y, r: 10, max: 120, life: .6, full: .6, color: s.color, w: 6}, {x: s.x, y: s.y, r: 4, max: 70, life: .4, full: .4, color: '#FFFFFF', w: 3});
+        for (let i = 0; i < 7; i++) { const a = V() * TAU, sp = 60 + V() * 180; debris.push({x: s.x, y: s.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, a: V() * TAU, va: (V() - .5) * 14, len: 6 + V() * 12, life: 1.2 + V() * .8, full: 2, color: s.color}); }
+        addShake(12); if (!reduced) flashA = Math.max(flashA, .28);
+      };
+      const fxRock = r => {
+        spark(r.x, r.y, '#B8BED6', 18 + Math.round(r.r / 3), 40, 220, .3, .9, 3); spark(r.x, r.y, '#FFC53D', 8, 80, 260, .15, .4, 2.5);
+        rings.push({x: r.x, y: r.y, r: r.r * .5, max: r.r * 1.8, life: .4, full: .4, color: '#B8BED6', w: 2.5});
+        const n = r.r > 22 ? 6 : 4; for (let i = 0; i < n; i++) { const a = V() * TAU, sp = 40 + V() * 140; debris.push({x: r.x, y: r.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, a: V() * TAU, va: (V() - .5) * 8, len: r.r * (.25 + V() * .3), life: .9 + V() * .7, full: 1.6, color: '#8990AE', rock: true}); }
+        addShake(r.r > 22 ? 5 : 2);
+      };
       const boom = (x, y, color, n = 18) => { for (let i = 0; i < n; i++) { const a = V() * TAU, s = 40 + V() * 200; parts.push({x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: .4 + V() * .6, color}); } };
       const knockout = (s, by) => {
-        s.alive = false; boom(s.x, s.y, s.color, 40); boom(s.x, s.y, '#FFFFFF', 14);
+        s.alive = false; fxKO(s);
         const place = ships.filter(x => x.alive).length + 1;
         const text = by === 'rock' ? `${s.name} flew into an asteroid` : `${s.name} was blasted by ${by.name}`;
         outs.push({s, place, text}); if (by && by.name) by.kills++;
         ticker.textContent = (s.name === focus ? "That's you! " : '') + `#${place} ${text}`; renderSide();
       };
-      const hit = (s, by) => { if (s.inv > 0 || !s.alive) return; s.hp--; s.flash = .25; s.inv = .35; boom(s.x, s.y, s.color, 8); if (s.hp <= 0) knockout(s, by); else renderSide(); };
+      const hit = (s, by) => { if (s.inv > 0 || !s.alive) return; s.hp--; s.flash = .25; s.inv = .35; fxHit(s); if (s.hp <= 0) knockout(s, by); else renderSide(); };
       const renderSide = () => {
         const alive = ships.filter(s => s.alive);
         aliveEl.innerHTML = alive.map(s => `<span class="chip"><i class="dot" style="background:${s.color}"></i>${esc(s.name)}<span class="hp">${'●'.repeat(s.hp)}${'○'.repeat(3 - s.hp)}</span></span>`).join('') || '<span class="note">Nobody.</span>';
@@ -456,7 +481,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
           b.x += b.vx * DT; b.y += b.vy * DT; b.life -= DT; wrap(b);
           for (const s of ships) if (s.alive && s !== b.owner && (b.x - s.x) ** 2 + (b.y - s.y) ** 2 < 19 * 19) { b.life = 0; hit(s, b.owner); break; }
           if (b.life > 0) for (let i = rocks.length - 1; i >= 0; i--) { const r = rocks[i];
-            if ((b.x - r.x) ** 2 + (b.y - r.y) ** 2 < r.r * r.r) { b.life = 0; rocks.splice(i, 1); boom(r.x, r.y, '#9AA0B8', 10);
+            if ((b.x - r.x) ** 2 + (b.y - r.y) ** 2 < r.r * r.r) { b.life = 0; rocks.splice(i, 1); fxRock(r);
               if (r.r > 22) for (let q = 0; q < 2; q++) { const nr = makeRock(r.x, r.y, r.r * .58); nr.vx *= 1.8; nr.vy *= 1.8; rocks.push(nr); } break; } }
         }
         bullets = bullets.filter(b => b.life > 0);
@@ -468,9 +493,10 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
         const alive = ships.filter(s => s.alive);
         if (alive.length <= 1) finish(alive[0] || outs[outs.length - 1].s);
       };
+      const RULES = () => `<ul class="rules"><li><b>●●●</b>Every ship has 3 lives</li><li><b>−1</b>Lose a life when you're shot or hit an asteroid</li><li><b>1st</b>Last ship flying wins the round</li><li><b>×${totalRounds()}</b>${totalRounds() > 1 ? `${totalRounds()} rounds. Winners sit out the rest` : 'One round only'}</li></ul>`;
       const idle = (sub, big) => {
         overlay.hidden = false;
-        overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span><div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`;
+        overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span>${RULES()}<div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`;
       };
       const finish = winner => {
         over = true;
@@ -493,10 +519,12 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
       };
       const countdown = label => {
         let n = 3; paused = true; clearTimeout(timer);
+        const extra = round === 0 ? RULES() : `<span class="sub" style="color:#EEF0FA">Sitting out: ${roundWinners.slice(0, round).map(w => `<span style="color:${w.color}">${esc(w.name)}</span>`).join(', ')} · everyone else back to 3 lives</span>`;
+        const step = round === 0 ? 1300 : 900;
         const tick = () => {
           overlay.hidden = false;
-          overlay.innerHTML = `<span class="sub">${label}</span><span class="count-big">${n || 'Go!'}</span>`;
-          if (n > 0) { n--; timer = setTimeout(tick, 900); }
+          overlay.innerHTML = `<span class="sub">${label}</span><span class="count-big">${n || 'Go!'}</span>${extra}`;
+          if (n > 0) { n--; timer = setTimeout(tick, step); }
           else timer = setTimeout(() => { overlay.hidden = true; paused = false; }, 550);
         };
         tick();
@@ -523,12 +551,17 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
       $('#ptabs').addEventListener('click', e => { const b = e.target.closest('.ptab'); if (!b) return; focus = focus === b.dataset.p ? '' : b.dataset.p; store.set('battleFocus', focus); renderSide(); if (!running) draw(); });
       const draw = () => {
         ctx.fillStyle = '#070914'; ctx.fillRect(0, 0, W, H);
+        ctx.save(); if (shake > .3) ctx.translate((V() - .5) * shake, (V() - .5) * shake);
         for (const s of stars) { ctx.globalAlpha = s.a; ctx.fillStyle = '#fff'; ctx.fillRect(s.x, s.y, s.s, s.s); }
         ctx.globalAlpha = 1; ctx.lineWidth = 2; ctx.strokeStyle = '#8990AE';
         for (const r of rocks) { ctx.beginPath(); r.pts.forEach((p, i) => { const a = r.a + i / r.pts.length * TAU; const x = r.x + Math.cos(a) * r.r * p, y = r.y + Math.sin(a) * r.r * p; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.fillStyle = '#161A2E'; ctx.fill(); ctx.stroke(); }
         const hasFocus = focus && ships.some(s => s.name === focus && s.alive);
         for (const b of bullets) { ctx.globalAlpha = hasFocus && b.owner.name !== focus ? .5 : 1; ctx.fillStyle = b.owner.color; ctx.beginPath(); ctx.arc(b.x, b.y, 2.6, 0, TAU); ctx.fill(); }
-        for (const p of parts) { ctx.globalAlpha = Math.min(1, p.life * 2); ctx.fillStyle = p.color; ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3); }
+        for (const d of debris) { ctx.globalAlpha = Math.max(0, Math.min(1, d.life)); ctx.save(); ctx.translate(d.x, d.y); ctx.rotate(d.a); ctx.strokeStyle = d.color; ctx.lineWidth = d.rock ? 2.5 : 3; ctx.beginPath(); ctx.moveTo(-d.len / 2, 0); ctx.lineTo(d.len / 2, 0); ctx.stroke(); ctx.restore(); }
+        ctx.globalCompositeOperation = 'lighter';
+        for (const p of parts) { const k = Math.max(0, Math.min(1, p.life * 2)), sz = (p.size || 3) * (.5 + k * .5); ctx.globalAlpha = k; ctx.fillStyle = p.color; ctx.fillRect(p.x - sz / 2, p.y - sz / 2, sz, sz); }
+        for (const g of rings) { const k = 1 - g.life / g.full; ctx.globalAlpha = Math.max(0, g.life / g.full); ctx.strokeStyle = g.color; ctx.lineWidth = g.w * (1 - k * .6); ctx.beginPath(); ctx.arc(g.x, g.y, g.r + (g.max - g.r) * (1 - Math.pow(1 - k, 3)), 0, TAU); ctx.stroke(); }
+        ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = 1;
         ctx.font = `700 ${Math.max(15, 12 / scale)}px Figtree, system-ui, sans-serif`; ctx.textAlign = 'center';
         ctx.globalAlpha = 1;
@@ -545,12 +578,19 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
           ctx.fillStyle = me ? '#FFC53D' : '#EEF0FA'; ctx.fillText(me ? `${s.name} (you)` : s.name, s.x, s.y - (me ? 40 : 22));
           for (let k = 0; k < 3; k++) { ctx.fillStyle = k < s.hp ? s.color : '#333851'; ctx.fillRect(s.x - 13 + k * 9, s.y + 20, 7, 4); }
         }
-        ctx.globalAlpha = 1;
+        ctx.textAlign = 'center';
+        for (const f of floaters) { const k = f.life / f.full; ctx.globalAlpha = Math.min(1, k * 2); ctx.font = `800 ${Math.max(f.big ? 26 : 17, (f.big ? 20 : 13) / scale)}px "Bricolage Grotesque", system-ui, sans-serif`; ctx.fillStyle = f.color; ctx.fillText(f.txt, f.x, f.y - (1 - k) * 26); }
+        ctx.globalAlpha = 1; ctx.restore();
+        if (flashA > .01) { ctx.fillStyle = `rgba(255,255,255,${flashA})`; ctx.fillRect(0, 0, W, H); }
         hud.textContent = `Battle #${battleId()}` + (running && !over ? ` · Round ${round + 1} of ${totalRounds()} · ${ships.filter(s => s.alive).length} left · ${Math.floor(t)}s${t > 25 ? ' · firing faster' : ''}` : '');
       };
       const loop = now => {
         const real = Math.min(.1, (now - last) / 1000); last = now;
-        for (const p of parts) { p.x += p.vx * real; p.y += p.vy * real; p.life -= real; p.vx *= .97; p.vy *= .97; }
+        for (const p of parts) { p.x += p.vx * real; p.y += p.vy * real; p.life -= real; p.vx *= .95; p.vy *= .95; }
+        for (const g of rings) g.life -= real; rings = rings.filter(g => g.life > 0);
+        for (const d of debris) { d.x += d.vx * real; d.y += d.vy * real; d.a += d.va * real; d.vx *= .985; d.vy *= .985; d.life -= real; } debris = debris.filter(d => d.life > 0);
+        for (const f of floaters) f.life -= real; floaters = floaters.filter(f => f.life > 0);
+        shake *= Math.pow(.02, real); flashA *= Math.pow(.001, real);
         parts = parts.filter(p => p.life > 0);
         if (!over && !paused) { acc += real * speed(); while (acc >= DT && !over) { step(); acc -= DT; } }
         draw();

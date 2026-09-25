@@ -15,6 +15,8 @@ Three rounds, and the last ship flying wins each one. The ships fly and shoot at
 - A battle has **3 rounds**. The winner of each round sits out the rounds after it, so you get three different winners.
 - With 3 names there are 2 rounds, and with 2 names there is 1.
 - Every round starts with a **3, 2, 1, Go!** countdown, with the ships in place and the fight paused.
+- Before round 1 (and on the ready screen), four rule cards explain the game: 3 lives each, lose a life when shot or hit by an asteroid, last ship flying wins the round, and winners sit out the rest. The first countdown is slower (1.3 s per number) so there's time to read them.
+- Later countdowns show who is sitting out, and that everyone else is back to 3 lives.
 - When a round ends, the winner is shown for 3.5 seconds with a burst of confetti in their colour, then the next countdown starts.
 - At the end, the three winners are revealed one at a time (First, Second, Third), each with confetti. A bigger burst follows the last reveal.
 - Each round has its own seed, worked out from the battle seed, so the whole battle is still identical for everyone.
@@ -23,13 +25,22 @@ Three rounds, and the last ship flying wins each one. The ships fly and shoot at
 
 - Under the arena there is a tab for each player. Tap your name to follow your ship.
 - Your ship gets a pulsing ring and a "(you)" label, and the other ships and their bullets fade back.
-- Each tab shows that player's status: shields left, "Out #n" once knocked out, or "Won R1" once they've won a round.
+- Each tab shows that player's status: lives left, "Out #n" once knocked out, or "Won R1" once they've won a round.
 - If you're knocked out, the ticker says "That's you!". A win adds "(you!)" to your name.
 - Tap your name again to stop following. Your choice is saved in your browser only, so each viewer picks their own.
 
+## Hit effects
+
+These are visual only. They use `Math.random`, so they never change the fight.
+
+- **Losing a life:** a burst of sparks in the ship's colour, a white shockwave ring, a small screen shake, and a floating "−1 life".
+- **Knockout:** a large explosion with glowing sparks, two shockwave rings, tumbling hull fragments, a stronger shake, a brief white flash and a floating "OUT!".
+- **Asteroid hit:** a dust burst, a shockwave, tumbling rock fragments and a shake that scales with the asteroid's size.
+- Viewers whose device is set to reduce motion don't get the shake or the flash.
+
 ## Full-screen side panel
 
-In full screen on a landscape screen, a panel on the right, pinned to the top and the same height as the arena so it never moves, lists who is still flying, with their shields, and the round winners so far. The player you're following is highlighted. In portrait the panel is hidden to save space, and the player tabs show the same information.
+In full screen on a landscape screen, a panel on the right, pinned to the top and the same height as the arena so it never moves, lists who is still flying, with their lives, and the round winners so far. The player you're following is highlighted. In portrait the panel is hidden to save space, and the player tabs show the same information.
 
 ## Colours
 
@@ -43,7 +54,7 @@ If you change the list, a new battle is created automatically. Send the new link
 
 ## Rules
 
-- Each ship starts with **3 shields**. Losing all three knocks it out.
+- Each ship starts with **3 lives**. Losing all three knocks it out.
 - A bullet hit costs 1 shield. A ship can't be hit by its own bullets.
 - Flying into an asteroid costs 1 shield and bounces the ship away.
 - Shooting a large asteroid splits it in two. Shooting a small one destroys it.
@@ -163,6 +174,8 @@ Everything is in `index.html`, inside `tools.battle`:
 | Rounds and ending | `finish()`, `finale()`, `countdown()` |
 | Player tabs and side panel | `renderTabs()`, `renderSide()` |
 | Confetti | `confetti()`, `stopConfetti()` |
+| Hit effects | `fxHit()`, `fxKO()`, `fxRock()` |
+| Rules cards | `RULES()` |
 | One simulation step | `step()` |
 | Drawing | `draw()` |
 | Frame loop | `loop()` |
