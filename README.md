@@ -50,5 +50,6 @@ Each viewer's browser keeps its own settings in `localStorage`, under keys that 
 | `dice` | Dice count and number of sides |
 | `num` | Number picker settings |
 | `battleSeed` | The current Space battle ID |
+| `battleSpeed` | The chosen Space battle speed |
 
 Nothing is sent to a server. If storage is blocked, as in some private windows, the page still works but forgets these between visits.

@@ -6,8 +6,9 @@ The last ship flying wins. The ships fly and shoot at random, so nobody controls
 
 1. Open the **Space battle** tab. The ships use the names in **Your list**.
 2. Press **New battle** until you get a starting layout you like. Each battle has an ID, such as `#K7SVF`, shown in the corner of the arena.
-3. Share it using **Send on WhatsApp** or **Copy link**.
-4. Watch it using **Watch in full screen** or **Watch here**.
+3. Pick a **Speed**: 0.5×, 0.75× (the default), 1×, 2× or 4×. The speed goes into the link, so everyone watches at the pace you chose.
+4. Share it using **Send on WhatsApp** or **Copy link**.
+5. Watch it using **Watch in full screen** or **Watch here**.
 
 Anyone who opens the link gets a watch-only page. It has no tabs, no list, no speed control and no share box: just the arena and a play button.
 
@@ -23,24 +24,28 @@ If you change the list, a new battle is created automatically. Send the new link
 - The last ship left wins. If the final two are knocked out in the same instant, the one knocked out last wins.
 - The knockout feed records who took out whom, in finishing order (#13 is out first, #2 is the runner-up).
 
-A battle with 13 pilots usually lasts well under two minutes at normal speed.
+A battle with 13 pilots usually lasts well under two minutes at 1×. At the default 0.75× it takes a third longer.
 
 ## How everyone sees the same fight
 
 The fight isn't streamed. Each viewer's browser runs the whole battle itself from the same starting numbers. The simulation is deterministic, meaning the same inputs always give the same fight, so every viewer gets the same shots, knockouts and winner.
 
-The two inputs are:
+The inputs are:
 
 1. **Seed**: a random whole number, chosen when you press New battle. It is shown as the battle ID.
 2. **Names**: the list, in its original order.
+3. **Speed**: how fast it plays. This changes the pace only, never the outcome.
 
-Both go in the link:
+All three go in the link:
 
 ```
-<page address>#fight.<seed in base 36>.<names in base64url>
+<page address>#fight.<seed in base 36>.<names in base64url>.x<speed × 100>
 ```
 
-For example: `…#fight.k7svf.Um9iClNhcmFo…`
+For example: `…#fight.k7svf.Um9iClNhcmFo….x075` plays at 0.75×.
+
+- The speed part is optional. Links sent before it existed play at 0.75×.
+- Only 0.5, 0.75, 1, 2 and 4 are accepted. Anything else falls back to 0.75×.
 
 - The names are joined with line breaks, encoded as UTF-8, then base64url-encoded with `=` padding removed. That keeps the link to characters Claude artifact links allow in the anchor (letters, digits, `.`, `_`, `-`).
 - When the page opens with a `#fight.` link, it goes straight into watch-only mode.
@@ -52,7 +57,7 @@ For example: `…#fight.k7svf.Um9iClNhcmFo…`
 |---|---|
 | All game decisions use a seeded random-number generator (mulberry32) | Same seed, same sequence of choices |
 | The simulation advances in fixed steps of 1/120 s | Frame rate and device speed don't change the result |
-| Speed (1×, 2×, 4×) only changes how many steps run per second | Pace changes, the outcome doesn't |
+| Speed (0.5× to 4×) only changes how many steps run per second | Pace changes, the outcome doesn't |
 | Headings use a 1,024-step sine/cosine table rounded to 9 decimal places | Removes tiny differences between browsers' maths libraries |
 | Distances use only `Math.sqrt`, and drag is a fixed constant | Both give identical results in every browser |
 | Explosions, stars and engine flicker use `Math.random` | These are visual only and never affect the fight |
@@ -123,7 +128,8 @@ Everything is in `index.html`, inside `tools.battle`:
 
 | Part | Function or constant |
 |---|---|
-| Link encode and decode | `encNames`, `decNames`, `parseFight` |
+| Link encode and decode | `encNames`, `decNames`, `parseFight`, `speedCode` |
+| Speed options | `SPEEDS`, `DEFAULT_SPEED` |
 | Share link base | `ART_URL`: the artifact URL, or the page's own address when `window.LUCKY_STANDALONE` is true |
 | Random numbers | `mulberry` |
 | Setup | `setup()` |

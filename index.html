@@ -293,7 +293,9 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
   const ART_URL = window.LUCKY_STANDALONE ? location.origin + location.pathname : 'https://claude.ai/artifact/5R3J9QHsX3Fiz61dL5TmCE';
   const encNames = names => { const bytes = new TextEncoder().encode(names.join('\n')); let s = ''; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
   const decNames = str => { try { let b = str.replace(/-/g, '+').replace(/_/g, '/'); while (b.length % 4) b += '='; const bin = atob(b); return new TextDecoder().decode(Uint8Array.from(bin, ch => ch.charCodeAt(0))).split('\n').map(x => x.trim()).filter(Boolean); } catch { return []; } };
-  const parseFight = h => { const m = /^fight\.([0-9a-z]+)\.([A-Za-z0-9_-]+)$/.exec(h || ''); if (!m) return null; const names = decNames(m[2]); const seed = parseInt(m[1], 36) >>> 0; return names.length >= 2 ? {seed, names} : null; };
+  const SPEEDS = [0.5, 0.75, 1, 2, 4], DEFAULT_SPEED = 0.75;
+  const speedCode = v => 'x' + String(Math.round(v * 100)).padStart(3, '0');
+  const parseFight = h => { const m = /^fight\.([0-9a-z]+)\.([A-Za-z0-9_-]+)(?:\.x(\d{2,3}))?$/.exec(h || ''); if (!m) return null; const names = decNames(m[2]); const seed = parseInt(m[1], 36) >>> 0; const sp = m[3] ? parseInt(m[3], 10) / 100 : DEFAULT_SPEED; return names.length >= 2 ? {seed, names, speed: SPEEDS.includes(sp) ? sp : DEFAULT_SPEED} : null; };
   tools.battle = {
     name: 'Space battle', usesList: true,
     icon: icon('<path d="M12 2 19 21 12 17 5 21Z"/>'),
@@ -305,7 +307,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
           <button class="btn" id="bstart" type="button">Watch in full screen</button>
           <button class="btn ghost" id="bhere" type="button">Watch here</button>
           ${guest ? '' : '<button class="btn ghost" id="bnew" type="button">New battle</button>'}
-          ${guest ? '' : '<label class="f" for="bspeed" style="flex-direction:row; align-items:center; gap:8px">Speed<select id="bspeed" style="width:auto"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label>'}
+          ${guest ? '' : '<label class="f" for="bspeed" style="flex-direction:row; align-items:center; gap:8px">Speed<select id="bspeed" style="width:auto">' + SPEEDS.map(v => `<option value="${v}">${v}×</option>`).join('') + '</select></label>'}
         </div>
         <div class="arena-wrap" id="awrap">
           <div class="arena" id="arena"><canvas id="bc" aria-label="Space battle arena"></canvas><div class="hud" id="hud"></div><div class="ticker" id="ticker" aria-live="polite"></div><div class="overlay" id="bo"></div></div>
@@ -313,7 +315,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
           <p class="turn-hint">Turn your phone sideways for a bigger view</p>
         </div>
         ${guest ? '' : `<div class="share">
-          <div><p class="eyebrow">Share this battle</p><p class="note" style="margin-top:6px">Send the link once. Everyone who opens it sees the same ships, the same shots and the same winner. Speed only changes the pace, never the result.</p></div>
+          <div><p class="eyebrow">Share this battle</p><p class="note" style="margin-top:6px">Send the link once. Everyone who opens it sees the same ships, the same shots and the same winner, at the speed you pick here. Speed only changes the pace, never the result.</p></div>
           <input id="blink" readonly aria-label="Battle link">
           <div class="row"><a class="btn wa" id="bwa" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn ghost" id="bcopy" type="button">Copy link</button><span class="note" id="bcmsg" aria-live="polite"></span></div>
         </div>`}
@@ -338,7 +340,8 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
       const makeRock = (x, y, r) => { const n = 9 + Math.floor(R() * 4); return {x, y, r, vx: (R() - .5) * 60, vy: (R() - .5) * 60, a: 0, va: (R() - .5) * 1.2, pts: Array.from({length: n}, () => .72 + R() * .35)}; };
       const edgeRock = () => { const side = Math.floor(R() * 4), p = R(); return makeRock(side % 2 ? p * W : (side ? W - 1 : 0), side % 2 ? (side === 1 ? 0 : H - 1) : p * H, 28 + R() * 22); };
       const battleId = () => seed.toString(36).toUpperCase();
-      const link = () => `${ART_URL}#fight.${seed.toString(36)}.${encNames(names)}`;
+      const speed = () => speedSel ? +speedSel.value : guest.speed;
+      const link = () => `${ART_URL}#fight.${seed.toString(36)}.${encNames(names)}.${speedCode(speed())}`;
       const setup = () => {
         R = mulberry(seed);
         const order = names.slice(); for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
@@ -436,7 +439,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
         const real = Math.min(.1, (now - last) / 1000); last = now;
         for (const p of parts) { p.x += p.vx * real; p.y += p.vy * real; p.life -= real; p.vx *= .97; p.vy *= .97; }
         parts = parts.filter(p => p.life > 0);
-        if (!over) { acc += real * (speedSel ? +speedSel.value : 1); while (acc >= DT && !over) { step(); acc -= DT; } }
+        if (!over) { acc += real * speed(); while (acc >= DT && !over) { step(); acc -= DT; } }
         draw();
         if (running) raf = requestAnimationFrame(loop);
       };
@@ -480,6 +483,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
         setup(); idle(`Battle #${battleId()} · ${names.length} pilots`, 'Ready for launch'); refreshShare();
       };
       const ro = new ResizeObserver(() => { size(); if (!running) draw(); }); ro.observe(c);
+      if (speedSel) { const sv = store.get('battleSpeed', DEFAULT_SPEED); speedSel.value = String(SPEEDS.includes(sv) ? sv : DEFAULT_SPEED); speedSel.onchange = () => { store.set('battleSpeed', +speedSel.value); refreshShare(); }; }
       const onList = () => { if (!running && !guest) newBattle(); }; listeners.add(onList);
       if (guest) { seed = guest.seed; names = guest.names; setup(); idle(`Battle #${battleId()} · ${names.length} pilots`, 'Who will be the last ship flying?'); }
       else { names = items(); const saved = store.get('battleSeed', 0); if (saved && names.length >= 2) { seed = saved; setup(); idle(`Battle #${battleId()} · ${names.length} pilots`, 'Ready for launch'); refreshShare(); } else newBattle(); }
