@@ -29,7 +29,7 @@ Three rounds, and the last ship flying wins each one. The ships fly and shoot at
 
 ## Full-screen side panel
 
-In full screen on a landscape screen, a panel on the right lists who is still flying, with their shields, and the round winners so far. The player you're following is highlighted. In portrait the panel is hidden to save space, and the player tabs show the same information.
+In full screen on a landscape screen, a panel on the right, pinned to the top and the same height as the arena so it never moves, lists who is still flying, with their shields, and the round winners so far. The player you're following is highlighted. In portrait the panel is hidden to save space, and the player tabs show the same information.
 
 ## Colours
 

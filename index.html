@@ -159,7 +159,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
 @media (orientation:landscape){
   .arena-wrap.theatre,.arena-wrap:fullscreen{display:grid; grid-template-columns:auto 240px; justify-content:center; align-content:center; column-gap:14px; row-gap:8px}
   .arena-wrap.theatre > *,.arena-wrap:fullscreen > *{grid-column:1}
-  .arena-wrap.theatre .fs-side,.arena-wrap:fullscreen .fs-side{display:flex; grid-column:2; grid-row:1 / span 3}
+  .arena-wrap.theatre .fs-side,.arena-wrap:fullscreen .fs-side{display:flex; grid-column:2; grid-row:1; align-self:start; height:calc(min(calc(100vw - 290px), calc((100vh - 170px) * 1.6)) / 1.6); max-height:none}
   .arena-wrap.theatre .exitfs,.arena-wrap:fullscreen .exitfs{grid-column:1 / -1; justify-self:center}
   .arena-wrap.theatre .arena,.arena-wrap:fullscreen .arena,.arena-wrap.theatre .ptabs,.arena-wrap:fullscreen .ptabs,.arena-wrap.theatre .ptabs-label,.arena-wrap:fullscreen .ptabs-label{width:min(calc(100vw - 290px), calc((100vh - 170px) * 1.6))}
 }
