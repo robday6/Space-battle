@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Space battle: one link, everyone watches the same fight.">
+<meta property="og:title" content="Lucky Dip · Space battle">
+<meta property="og:description" content="Who will be the last ship flying? Everyone who opens this link watches the same fight.">
+<script>window.LUCKY_STANDALONE = true;</script>
+<title>Lucky Dip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{
+  --bg:#EDEFF6; --surface:#FFFFFF; --surface-2:#F5F6FB; --ink:#15172A; --muted:#5B6078; --line:#D6D9E6;
+  --accent:#2D3BFF; --accent-ink:#FFFFFF; --sun:#FFC53D; --pink:#FF5C8A; --teal:#17A999;
+  --shadow:0 1px 0 rgba(21,23,42,.06), 0 8px 24px -12px rgba(21,23,42,.25);
+  --display:"Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#10121F; --surface:#1A1D30; --surface-2:#22263D; --ink:#EEF0FA; --muted:#A2A7C2; --line:#33384F;
+    --accent:#7C86FF; --accent-ink:#0E1020; --shadow:0 1px 0 rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#10121F; --surface:#1A1D30; --surface-2:#22263D; --ink:#EEF0FA; --muted:#A2A7C2; --line:#33384F;
+  --accent:#7C86FF; --accent-ink:#0E1020; --shadow:0 1px 0 rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body.guest #tabs, body.guest .tag{display:none}
+[hidden]{display:none!important}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:15px; line-height:1.5; padding-inline:16px; padding-block:20px 48px}
+.wrap{max-width:1040px; margin:0 auto; display:flex; flex-direction:column; gap:20px}
+header{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:8px 24px}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(34px,6vw,52px); line-height:1; letter-spacing:-.02em; margin:0}
+h1 span{color:var(--accent)}
+.tag{color:var(--muted); margin:0; max-width:42ch}
+.tabs{display:flex; gap:6px; overflow-x:auto; padding:4px; background:var(--surface); border:1px solid var(--line); border-radius:14px; scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto; border:0; background:transparent; color:var(--muted); font:600 14px/1 var(--body); padding:11px 14px; border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:7px}
+.tab svg{width:16px; height:16px}
+.tab:hover{color:var(--ink); background:var(--surface-2)}
+.tab[aria-selected="true"]{background:var(--ink); color:var(--bg)}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.stage{display:grid; grid-template-columns:minmax(0,300px) minmax(0,1fr); gap:20px; align-items:start}
+.stage.solo{grid-template-columns:minmax(0,1fr)}
+@media (max-width:760px){ .stage{grid-template-columns:minmax(0,1fr)} }
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:12px}
+.tool{box-shadow:var(--shadow); padding:22px; min-height:420px}
+.eyebrow{font:600 11px/1 var(--body); text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin:0}
+h2{font-family:var(--display); font-weight:700; font-size:26px; line-height:1.1; margin:0; text-wrap:balance}
+.lede{margin:0; color:var(--muted); max-width:60ch}
+textarea{width:100%; min-height:220px; resize:vertical; background:var(--surface-2); color:var(--ink); border:1px solid var(--line); border-radius:12px; padding:12px; font:500 15px/1.6 var(--body)}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.count{font:500 13px var(--mono); color:var(--muted)}
+.btn{border:0; border-radius:12px; padding:12px 18px; font:700 15px/1 var(--body); cursor:pointer; background:var(--accent); color:var(--accent-ink); transition:transform .08s}
+.btn:active{transform:translateY(1px) scale(.98)}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+.btn.ghost{background:var(--surface-2); color:var(--ink); border:1px solid var(--line)}
+.btn.small{padding:8px 12px; font-size:13px}
+.btn.big{padding:16px 26px; font-size:17px}
+label.f{display:flex; flex-direction:column; gap:5px; font:600 12px var(--body); color:var(--muted)}
+input[type=number], select{background:var(--surface-2); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font:500 16px var(--mono); width:96px}
+.check{display:flex; gap:8px; align-items:center; font-weight:500; cursor:pointer}
+.check input{width:18px; height:18px; accent-color:var(--accent)}
+.result{font-family:var(--display); font-weight:800; font-size:clamp(34px,7vw,60px); line-height:1.05; letter-spacing:-.02em; text-align:center; min-height:1.1em; overflow-wrap:anywhere; margin:0}
+.result.pop{animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{0%{transform:scale(.6); opacity:.2}100%{transform:scale(1); opacity:1}}
+.center{display:flex; flex-direction:column; align-items:center; gap:18px; text-align:center}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{background:var(--surface-2); border:1px solid var(--line); border-radius:999px; padding:5px 11px; font-weight:600; font-size:14px}
+.chip.out{text-decoration:line-through; color:var(--muted)}
+.chip b{font:700 12px var(--mono); color:var(--muted); margin-right:6px}
+/* wheel */
+.wheel-box{position:relative; width:min(100%,420px); aspect-ratio:1; max-width:100%}
+.wheel-box canvas{width:100%; height:100%; display:block}
+.pointer{position:absolute; left:50%; top:-6px; transform:translateX(-50%); width:0; height:0; border-left:16px solid transparent; border-right:16px solid transparent; border-top:30px solid var(--ink); filter:drop-shadow(0 2px 2px rgba(0,0,0,.25)); z-index:2}
+.hub{position:absolute; inset:0; margin:auto; width:17%; height:17%; border-radius:50%; background:var(--surface); border:4px solid var(--ink); display:grid; place-items:center; cursor:pointer; font:800 13px var(--display); color:var(--ink)}
+/* hat */
+.slip{background:var(--sun); color:#1B1600; padding:18px 30px; border-radius:6px; transform:rotate(-2deg); box-shadow:0 10px 20px -10px rgba(0,0,0,.4); font-family:var(--display); font-weight:800; font-size:clamp(28px,6vw,48px); line-height:1.1; overflow-wrap:anywhere; max-width:100%}
+.slip.empty{background:var(--surface-2); color:var(--muted); font-size:20px; font-weight:600; box-shadow:none; border:2px dashed var(--line)}
+/* teams */
+.teams{display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; width:100%}
+.team{border-radius:14px; padding:14px; border:1px solid var(--line); background:var(--surface-2); display:flex; flex-direction:column; gap:6px; text-align:left}
+.team h3{margin:0 0 4px; font:800 18px var(--display); display:flex; align-items:center; gap:8px}
+.team h3 i{width:12px; height:12px; border-radius:50%; display:inline-block}
+.team ol{margin:0; padding-left:20px}
+/* order */
+.order{list-style:none; margin:0; padding:0; width:100%; max-width:460px; display:flex; flex-direction:column; gap:6px; counter-reset:o}
+.order li{counter-increment:o; display:flex; align-items:center; gap:12px; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:10px 14px; font-weight:600; text-align:left}
+.order li::before{content:counter(o); font:700 14px var(--mono); width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--ink); color:var(--bg); flex:0 0 auto}
+/* dice */
+.dice{display:flex; flex-wrap:wrap; gap:14px; justify-content:center}
+.die{width:84px; height:84px; border-radius:18px; background:var(--surface); border:3px solid var(--ink); display:grid; place-items:center; font:800 34px var(--display); box-shadow:0 5px 0 var(--ink)}
+.die.rolling{animation:shake .12s linear infinite}
+@keyframes shake{0%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}100%{transform:rotate(-8deg)}}
+.pips{display:grid; grid-template-columns:repeat(3,14px); grid-template-rows:repeat(3,14px); gap:6px}
+.pips i{width:14px; height:14px; border-radius:50%}
+.pips i.on{background:var(--ink)}
+.total{font:700 18px var(--mono)}
+/* coin */
+.coin-scene{perspective:800px}
+.coin{width:170px; height:170px; position:relative; transform-style:preserve-3d; transition:transform 1.4s cubic-bezier(.2,.7,.2,1)}
+.face{position:absolute; inset:0; border-radius:50%; display:grid; place-items:center; backface-visibility:hidden; font:800 26px var(--display); letter-spacing:.04em; border:6px solid rgba(0,0,0,.18); box-shadow:inset 0 0 0 6px rgba(255,255,255,.25)}
+.face.h{background:var(--sun); color:#3A2A00}
+.face.t{background:var(--teal); color:#022A25; transform:rotateY(180deg)}
+.tally{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+.stat{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:10px 16px; min-width:92px}
+.stat b{display:block; font:700 24px var(--mono)}
+.stat span{font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.08em}
+.hist{display:flex; flex-wrap:wrap; gap:4px; justify-content:center; max-width:420px}
+.hist i{width:22px; height:22px; border-radius:50%; font:700 11px/22px var(--mono); font-style:normal; text-align:center}
+.hist i.H{background:var(--sun); color:#3A2A00}
+.hist i.T{background:var(--teal); color:#022A25}
+.nums{font-variant-numeric:tabular-nums}
+/* battle */
+.arena{position:relative; width:100%; aspect-ratio:16/10; border-radius:14px; overflow:hidden; background:#070914; border:1px solid var(--line)}
+.arena-wrap{display:flex; flex-direction:column; gap:10px}
+.exitfs,.turn-hint{display:none}
+.arena-wrap.theatre,.arena-wrap:fullscreen{position:fixed; inset:0; z-index:1000; background:#070914; align-items:center; justify-content:center; padding:max(12px, env(safe-area-inset-top, 0px)) 12px max(12px, env(safe-area-inset-bottom, 0px))}
+.arena-wrap:-webkit-full-screen{position:fixed; inset:0; z-index:1000; background:#070914; display:flex; align-items:center; justify-content:center; padding:12px}
+.arena-wrap.theatre .arena,.arena-wrap:fullscreen .arena{width:min(100%, calc((100vh - 90px) * 1.6)); border-color:#22263D}
+.arena-wrap.theatre .exitfs,.arena-wrap:fullscreen .exitfs{display:inline-block; background:#1A1D30; color:#EEF0FA; border-color:#33384F}
+@media (orientation:portrait){ .arena-wrap.theatre .turn-hint,.arena-wrap:fullscreen .turn-hint{display:block; color:#A2A7C2; font-size:13px; margin:0} }
+.ticker{position:absolute; left:0; right:0; bottom:8px; text-align:center; font:700 13px var(--body); color:#EEF0FA; text-shadow:0 1px 3px #000; pointer-events:none; padding:0 12px}
+.share{display:flex; flex-direction:column; gap:10px; background:var(--surface-2); border:1px solid var(--line); border-radius:14px; padding:14px}
+.share input{width:100%; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font:500 13px var(--mono); text-overflow:ellipsis}
+.btn.wa{background:#1FA855; color:#fff; text-decoration:none; display:inline-block}
+.arena canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+.overlay{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center; color:#EEF0FA; background:rgba(7,9,20,.55); padding:16px}
+.overlay .headline{font:800 clamp(28px,6vw,54px)/1.05 var(--display); letter-spacing:-.02em; overflow-wrap:anywhere}
+.overlay .sub{font:600 13px var(--body); text-transform:uppercase; letter-spacing:.14em; color:#A2A7C2}
+.hud{position:absolute; left:10px; top:10px; font:700 12px var(--mono); color:#A2A7C2; pointer-events:none}
+.bgrid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px}
+@media (max-width:560px){ .bgrid{grid-template-columns:minmax(0,1fr)} }
+.feed{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:4px; font-size:14px; max-height:220px; overflow-y:auto}
+.feed li{display:flex; gap:8px; align-items:baseline}
+.feed li b{font:700 12px var(--mono); color:var(--muted); min-width:26px}
+.chip .hp{font:700 11px var(--mono); margin-left:6px; color:var(--muted)}
+.chip i.dot{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px}
+.note{font-size:13px; color:var(--muted); margin:0}
+@media (prefers-reduced-motion: reduce){
+  .coin{transition:none} .die.rolling{animation:none} .result.pop{animation:none}
+}
+</style>
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Lucky <span>Dip</span></h1>
+    <p class="tag">Eight ways to let chance decide. Put your names in once and every list tool uses them.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+
+  <div class="stage" id="stage">
+    <aside class="panel" id="listPanel">
+      <p class="eyebrow">Your list</p>
+      <textarea id="listInput" aria-label="Names or options, one per line" spellcheck="false"></textarea>
+      <div class="row" style="justify-content:space-between">
+        <span class="count" id="listCount"></span>
+        <div class="row" style="gap:6px"><button class="btn ghost small" id="resetList" type="button">Reset to crew</button><button class="btn ghost small" id="clearList" type="button">Clear</button></div>
+      </div>
+      <p class="note">One name or option per line. Duplicates count twice.</p>
+    </aside>
+
+    <main class="panel tool" id="tool"></main>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- fair randomness ----------
+  const rand = n => { // integer in [0, n)
+    if (n <= 1) return 0;
+    const max = Math.floor(0x100000000 / n) * n, a = new Uint32Array(1);
+    do { crypto.getRandomValues(a); } while (a[0] >= max);
+    return a[0] % n;
+  };
+  const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // ---------- storage (optional) ----------
+  const store = {
+    get(k, d){ try { const v = localStorage.getItem('luckydip:' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v){ try { localStorage.setItem('luckydip:' + k, JSON.stringify(v)); } catch {} }
+  };
+
+  // ---------- shared list ----------
+  const SAMPLE = ['Rob', 'Sarah', 'Marc', 'Rosey', 'Donna + Das', 'Eric', 'Lucille', 'Helen', 'Luke', 'Angel', 'Dotty', 'Jamie', 'Alex'];
+  const listInput = document.getElementById('listInput');
+  const listCount = document.getElementById('listCount');
+  listInput.value = store.get('list-v2', SAMPLE.join('\n'));
+  const items = () => listInput.value.split('\n').map(s => s.trim()).filter(Boolean);
+  const listeners = new Set();
+  const updateCount = () => { const n = items().length; listCount.textContent = n + (n === 1 ? ' entry' : ' entries'); };
+  listInput.addEventListener('input', () => { store.set('list-v2', listInput.value); updateCount(); listeners.forEach(f => f()); });
+  document.getElementById('clearList').addEventListener('click', () => { listInput.value = ''; listInput.dispatchEvent(new Event('input')); listInput.focus(); });
+  document.getElementById('resetList').addEventListener('click', () => { listInput.value = SAMPLE.join('\n'); listInput.dispatchEvent(new Event('input')); });
+  updateCount();
+
+  const icon = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+  const SEG = ['#2D3BFF', '#FFC53D', '#FF5C8A', '#17A999', '#FF8A3D', '#8B5CF6'];
+  const SEG_INK = ['#FFFFFF', '#1B1600', '#FFFFFF', '#FFFFFF', '#1B1000', '#FFFFFF'];
+
+  // ---------- tools ----------
+  const tools = {};
+
+  // WHEEL
+  tools.wheel = {
+    name: 'Wheel', usesList: true,
+    icon: icon('<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/>'),
+    mount(el){
+      el.innerHTML = `
+        <div><p class="eyebrow">Spin the wheel</p><h2>Round and round it goes</h2></div>
+        <div class="center">
+          <div class="wheel-box"><div class="pointer"></div><canvas id="wc" aria-label="Spinning wheel"></canvas><button class="hub" id="hub" type="button" aria-label="Spin">SPIN</button></div>
+          <p class="result" id="wr" aria-live="polite">&nbsp;</p>
+          <div class="row" style="justify-content:center">
+            <button class="btn big" id="spin" type="button">Spin</button>
+            <label class="check"><input type="checkbox" id="wremove"> Remove winner after</label>
+          </div>
+        </div>`;
+      const c = el.querySelector('#wc'), ctx = c.getContext('2d'), out = el.querySelector('#wr');
+      let rot = 0, spinning = false;
+      const draw = () => {
+        const names = items(), size = c.clientWidth, dpr = devicePixelRatio || 1;
+        if (!size) return;
+        c.width = c.height = size * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const r = size / 2, n = Math.max(names.length, 1), seg = Math.PI * 2 / n;
+        ctx.clearRect(0, 0, size, size);
+        ctx.save(); ctx.translate(r, r); ctx.rotate(rot);
+        for (let i = 0; i < n; i++) {
+          const ci = n % SEG.length === 1 && i === n - 1 && n > 1 ? 2 : i % SEG.length;
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r - 4, i * seg, (i + 1) * seg); ctx.closePath();
+          ctx.fillStyle = names.length ? SEG[ci] : '#9AA0B8'; ctx.fill();
+          ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.lineWidth = 1; ctx.stroke();
+          const label = names[i] || 'Add names';
+          ctx.save(); ctx.rotate(i * seg + seg / 2);
+          ctx.fillStyle = names.length ? SEG_INK[ci] : '#fff'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+          const fs = Math.max(10, Math.min(22, r * 0.9 * seg * 0.55, r / 9));
+          ctx.font = `700 ${fs}px Figtree, system-ui, sans-serif`;
+          let t = label; const maxW = r * 0.68;
+          while (ctx.measureText(t).width > maxW && t.length > 2) t = t.slice(0, -2) + '…';
+          ctx.fillText(t, r - 18, 0); ctx.restore();
+        }
+        ctx.restore();
+        ctx.beginPath(); ctx.arc(r, r, r - 3, 0, Math.PI * 2); ctx.lineWidth = 5;
+        ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--ink'); ctx.stroke();
+      };
+      const spin = () => {
+        const names = items();
+        if (spinning || names.length < 2) { if (names.length < 2) out.textContent = 'Add at least two names'; return; }
+        spinning = true; out.innerHTML = '&nbsp;'; out.classList.remove('pop');
+        const n = names.length, seg = Math.PI * 2 / n, w = rand(n);
+        const jitter = (rand(1000) / 1000 - 0.5) * 0.7;
+        const target = -Math.PI / 2 - (w + 0.5 + jitter) * seg;
+        const TAU = Math.PI * 2, norm = x => ((x % TAU) + TAU) % TAU;
+        const end = rot + (5 + rand(3)) * TAU + norm(target - rot);
+        const start = rot, dur = reduced ? 1 : 4200 + rand(1200), t0 = performance.now();
+        const ease = t => 1 - Math.pow(1 - t, 4);
+        const step = now => {
+          const t = Math.min(1, (now - t0) / dur); rot = start + (end - start) * ease(t); draw();
+          if (t < 1) requestAnimationFrame(step);
+          else {
+            rot = norm(rot); spinning = false; out.textContent = names[w]; void out.offsetWidth; out.classList.add('pop');
+            if (el.querySelector('#wremove').checked) {
+              const lines = listInput.value.split('\n'); const idx = lines.findIndex(l => l.trim() === names[w]);
+              if (idx > -1) { lines.splice(idx, 1); listInput.value = lines.join('\n'); listInput.dispatchEvent(new Event('input')); }
+            }
+          }
+        };
+        requestAnimationFrame(step);
+      };
+      el.querySelector('#spin').onclick = spin; el.querySelector('#hub').onclick = spin;
+      const ro = new ResizeObserver(draw); ro.observe(c);
+      const onList = () => { if (!spinning) draw(); }; listeners.add(onList);
+      draw();
+      return () => { ro.disconnect(); listeners.delete(onList); };
+    }
+  };
+
+  // BATTLE
+  const ART_URL = window.LUCKY_STANDALONE ? location.origin + location.pathname : 'https://claude.ai/artifact/5R3J9QHsX3Fiz61dL5TmCE';
+  const encNames = names => { const bytes = new TextEncoder().encode(names.join('\n')); let s = ''; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+  const decNames = str => { try { let b = str.replace(/-/g, '+').replace(/_/g, '/'); while (b.length % 4) b += '='; const bin = atob(b); return new TextDecoder().decode(Uint8Array.from(bin, ch => ch.charCodeAt(0))).split('\n').map(x => x.trim()).filter(Boolean); } catch { return []; } };
+  const parseFight = h => { const m = /^fight\.([0-9a-z]+)\.([A-Za-z0-9_-]+)$/.exec(h || ''); if (!m) return null; const names = decNames(m[2]); const seed = parseInt(m[1], 36) >>> 0; return names.length >= 2 ? {seed, names} : null; };
+  tools.battle = {
+    name: 'Space battle', usesList: true,
+    icon: icon('<path d="M12 2 19 21 12 17 5 21Z"/>'),
+    mount(el, opts = {}){
+      const guest = opts.fight || null;
+      el.innerHTML = `
+        <div><p class="eyebrow">Last ship flying</p><h2>Space battle</h2><p class="lede">${guest ? `${guest.names.length} pilots, three shields each, one survivor. Everyone with this link watches exactly the same fight.` : 'Every name gets a ship with three shields. They steer and fire at random, asteroids get in the way, and the last one left wins. Share the battle and everyone who opens the link watches the identical fight.'}</p></div>
+        <div class="row">
+          <button class="btn" id="bstart" type="button">Watch in full screen</button>
+          <button class="btn ghost" id="bhere" type="button">Watch here</button>
+          ${guest ? '' : '<button class="btn ghost" id="bnew" type="button">New battle</button>'}
+          ${guest ? '' : '<label class="f" for="bspeed" style="flex-direction:row; align-items:center; gap:8px">Speed<select id="bspeed" style="width:auto"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label>'}
+        </div>
+        <div class="arena-wrap" id="awrap">
+          <div class="arena" id="arena"><canvas id="bc" aria-label="Space battle arena"></canvas><div class="hud" id="hud"></div><div class="ticker" id="ticker" aria-live="polite"></div><div class="overlay" id="bo"></div></div>
+          <button class="btn ghost small exitfs" id="bexit" type="button">Exit full screen</button>
+          <p class="turn-hint">Turn your phone sideways for a bigger view</p>
+        </div>
+        ${guest ? '' : `<div class="share">
+          <div><p class="eyebrow">Share this battle</p><p class="note" style="margin-top:6px">Send the link once. Everyone who opens it sees the same ships, the same shots and the same winner. Speed only changes the pace, never the result.</p></div>
+          <input id="blink" readonly aria-label="Battle link">
+          <div class="row"><a class="btn wa" id="bwa" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn ghost" id="bcopy" type="button">Copy link</button><span class="note" id="bcmsg" aria-live="polite"></span></div>
+        </div>`}
+        <div class="bgrid">
+          <div><p class="eyebrow" style="margin-bottom:8px">Still flying</p><div class="chips" id="alive"></div></div>
+          <div><p class="eyebrow" style="margin-bottom:8px">Knockouts</p><ol class="feed" id="feed"></ol></div>
+        </div>
+`;
+      const $ = s => el.querySelector(s);
+      const c = $('#bc'), ctx = c.getContext('2d'), overlay = $('#bo'), hud = $('#hud'), ticker = $('#ticker'), wrapEl = $('#awrap');
+      const aliveEl = $('#alive'), feedEl = $('#feed'), speedSel = $('#bspeed');
+      const W = 1000, H = 625, DT = 1 / 120, DRAG = 0.9924, TAU = Math.PI * 2, U = 1024;
+      const COS = new Float64Array(U), SIN = new Float64Array(U);
+      for (let i = 0; i < U; i++) { COS[i] = Math.round(Math.cos(i / U * TAU) * 1e9) / 1e9; SIN[i] = Math.round(Math.sin(i / U * TAU) * 1e9) / 1e9; }
+      const ix = a => ((Math.floor(a) % U) + U) % U;
+      const mulberry = seed => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+      const V = Math.random; // visuals only, never the simulation
+      let R, seed, names, ships = [], bullets = [], rocks = [], parts = [], outs = [], t = 0, over = false, running = false, raf = 0, last = 0, acc = 0, scale = 1;
+      const stars = Array.from({length: 150}, () => ({x: V() * W, y: V() * H, s: V() * 1.4 + .3, a: V() * .6 + .2}));
+      const wrap = o => { o.x = (o.x + W) % W; o.y = (o.y + H) % H; };
+      const size = () => { const w = c.clientWidth, h = c.clientHeight, d = devicePixelRatio || 1; if (!w) return; c.width = w * d; c.height = h * d; scale = w / W; ctx.setTransform(d * scale, 0, 0, d * scale, 0, 0); };
+      const makeRock = (x, y, r) => { const n = 9 + Math.floor(R() * 4); return {x, y, r, vx: (R() - .5) * 60, vy: (R() - .5) * 60, a: 0, va: (R() - .5) * 1.2, pts: Array.from({length: n}, () => .72 + R() * .35)}; };
+      const edgeRock = () => { const side = Math.floor(R() * 4), p = R(); return makeRock(side % 2 ? p * W : (side ? W - 1 : 0), side % 2 ? (side === 1 ? 0 : H - 1) : p * H, 28 + R() * 22); };
+      const battleId = () => seed.toString(36).toUpperCase();
+      const link = () => `${ART_URL}#fight.${seed.toString(36)}.${encNames(names)}`;
+      const setup = () => {
+        R = mulberry(seed);
+        const order = names.slice(); for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+        const n = order.length, off = Math.floor(R() * U);
+        ships = order.map((name, i) => { const k = ix(off + i * U / n);
+          return {name, color: SEG[names.indexOf(name) % SEG.length], x: W / 2 + COS[k] * W * .36, y: H / 2 + SIN[k] * H * .36, a: R() * U, vx: 0, vy: 0, hp: 3, turn: 0, turnT: 0, thrustT: 0, fireT: .5 + R() * 1.5, inv: 1, flash: 0, alive: true, kills: 0}; });
+        bullets = []; parts = []; outs = []; t = 0; over = false; acc = 0;
+        rocks = Array.from({length: 4}, () => makeRock(W / 2 + (R() - .5) * 120, H / 2 + (R() - .5) * 80, 30 + R() * 20));
+        ticker.textContent = ''; renderSide(); draw();
+      };
+      const boom = (x, y, color, n = 18) => { for (let i = 0; i < n; i++) { const a = V() * TAU, s = 40 + V() * 200; parts.push({x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: .4 + V() * .6, color}); } };
+      const knockout = (s, by) => {
+        s.alive = false; boom(s.x, s.y, s.color, 40); boom(s.x, s.y, '#FFFFFF', 14);
+        const place = ships.filter(x => x.alive).length + 1;
+        const text = by === 'rock' ? `${s.name} flew into an asteroid` : `${s.name} was blasted by ${by.name}`;
+        outs.push({s, place, text}); if (by && by.name) by.kills++;
+        ticker.textContent = `#${place} ${text}`; renderSide();
+      };
+      const hit = (s, by) => { if (s.inv > 0 || !s.alive) return; s.hp--; s.flash = .25; s.inv = .35; boom(s.x, s.y, s.color, 8); if (s.hp <= 0) knockout(s, by); else renderSide(); };
+      const renderSide = () => {
+        const alive = ships.filter(s => s.alive);
+        aliveEl.innerHTML = alive.map(s => `<span class="chip"><i class="dot" style="background:${s.color}"></i>${esc(s.name)}<span class="hp">${'●'.repeat(s.hp)}${'○'.repeat(3 - s.hp)}</span></span>`).join('') || '<span class="note">Nobody.</span>';
+        feedEl.innerHTML = outs.length ? outs.slice().reverse().map(o => `<li><b>#${o.place}</b><span>${esc(o.text)}</span></li>`).join('') : '<li class="note">Nobody down yet.</li>';
+      };
+      // fixed-step, seeded simulation: identical on every device
+      const step = () => {
+        t += DT; const rage = 1 + t / 25;
+        for (const s of ships) {
+          if (!s.alive) continue;
+          s.inv = Math.max(0, s.inv - DT); s.flash = Math.max(0, s.flash - DT);
+          if ((s.turnT -= DT) <= 0) { s.turn = (R() * 2 - 1) * 520; s.turnT = .25 + R() * 1.1; }
+          s.a += s.turn * DT;
+          if (s.thrustT <= 0 && R() < DT * 1.4) s.thrustT = .25 + R() * .7;
+          const k = ix(s.a);
+          if (s.thrustT > 0) { s.vx += COS[k] * 260 * DT; s.vy += SIN[k] * 260 * DT; s.thrustT -= DT; }
+          s.vx *= DRAG; s.vy *= DRAG;
+          const sp = Math.sqrt(s.vx * s.vx + s.vy * s.vy); if (sp > 240) { s.vx *= 240 / sp; s.vy *= 240 / sp; }
+          s.x += s.vx * DT; s.y += s.vy * DT; wrap(s);
+          if ((s.fireT -= DT) <= 0) {
+            s.fireT = (.35 + R() * 1.3) / rage;
+            const kb = ix(s.a + (R() - .5) * 20);
+            bullets.push({x: s.x + COS[k] * 16, y: s.y + SIN[k] * 16, vx: COS[kb] * 480 + s.vx * .4, vy: SIN[kb] * 480 + s.vy * .4, life: 1.05, owner: s});
+          }
+        }
+        for (const b of bullets) {
+          b.x += b.vx * DT; b.y += b.vy * DT; b.life -= DT; wrap(b);
+          for (const s of ships) if (s.alive && s !== b.owner && (b.x - s.x) ** 2 + (b.y - s.y) ** 2 < 19 * 19) { b.life = 0; hit(s, b.owner); break; }
+          if (b.life > 0) for (let i = rocks.length - 1; i >= 0; i--) { const r = rocks[i];
+            if ((b.x - r.x) ** 2 + (b.y - r.y) ** 2 < r.r * r.r) { b.life = 0; rocks.splice(i, 1); boom(r.x, r.y, '#9AA0B8', 10);
+              if (r.r > 22) for (let q = 0; q < 2; q++) { const nr = makeRock(r.x, r.y, r.r * .58); nr.vx *= 1.8; nr.vy *= 1.8; rocks.push(nr); } break; } }
+        }
+        bullets = bullets.filter(b => b.life > 0);
+        for (const r of rocks) { r.x += r.vx * DT; r.y += r.vy * DT; r.a += r.va * DT; wrap(r);
+          for (const s of ships) if (s.alive && (s.x - r.x) ** 2 + (s.y - r.y) ** 2 < (r.r + 12) ** 2) {
+            const dx = s.x - r.x, dy = s.y - r.y, d = Math.sqrt(dx * dx + dy * dy) || 1; s.vx = dx / d * 200; s.vy = dy / d * 200; if (s.inv <= 0) { hit(s, 'rock'); s.inv = .9; } } }
+        const want = Math.min(8, 3 + Math.floor(t / 20));
+        if (rocks.length < want && R() < DT * .8) rocks.push(edgeRock());
+        const alive = ships.filter(s => s.alive);
+        if (alive.length <= 1) finish(alive[0] || outs[outs.length - 1].s);
+      };
+      const idle = (sub, big) => {
+        overlay.hidden = false;
+        overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span><div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`;
+      };
+      const finish = winner => {
+        over = true;
+        if (outs.length && outs[outs.length - 1].s === winner) { outs.pop(); renderSide(); }
+        ticker.textContent = '';
+        overlay.hidden = false;
+        overlay.innerHTML = `<span class="sub">Battle #${battleId()} · last ship flying</span><span class="headline" style="color:${winner.color}">${esc(winner.name)}</span><span class="sub">${winner.kills} knockout${winner.kills === 1 ? '' : 's'} · ${Math.round(t)} seconds</span><div class="row" style="justify-content:center"><button class="btn ghost" data-go="here" type="button">Watch it again</button></div>`;
+        setTimeout(() => { if (over) running = false; }, 2500);
+      };
+      const draw = () => {
+        ctx.fillStyle = '#070914'; ctx.fillRect(0, 0, W, H);
+        for (const s of stars) { ctx.globalAlpha = s.a; ctx.fillStyle = '#fff'; ctx.fillRect(s.x, s.y, s.s, s.s); }
+        ctx.globalAlpha = 1; ctx.lineWidth = 2; ctx.strokeStyle = '#8990AE';
+        for (const r of rocks) { ctx.beginPath(); r.pts.forEach((p, i) => { const a = r.a + i / r.pts.length * TAU; const x = r.x + Math.cos(a) * r.r * p, y = r.y + Math.sin(a) * r.r * p; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.fillStyle = '#161A2E'; ctx.fill(); ctx.stroke(); }
+        for (const b of bullets) { ctx.fillStyle = b.owner.color; ctx.beginPath(); ctx.arc(b.x, b.y, 2.6, 0, TAU); ctx.fill(); }
+        for (const p of parts) { ctx.globalAlpha = Math.min(1, p.life * 2); ctx.fillStyle = p.color; ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3); }
+        ctx.globalAlpha = 1;
+        ctx.font = `700 ${Math.max(15, 12 / scale)}px Figtree, system-ui, sans-serif`; ctx.textAlign = 'center';
+        for (const s of ships) {
+          if (!s.alive) continue;
+          ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.a / U * TAU); ctx.scale(1.35, 1.35);
+          if (s.thrustT > 0) { ctx.fillStyle = '#FFC53D'; ctx.beginPath(); ctx.moveTo(-9, -4); ctx.lineTo(-15 - V() * 8, 0); ctx.lineTo(-9, 4); ctx.fill(); }
+          ctx.beginPath(); ctx.moveTo(16, 0); ctx.lineTo(-10, -10); ctx.lineTo(-6, 0); ctx.lineTo(-10, 10); ctx.closePath();
+          ctx.fillStyle = s.flash > 0 ? '#FFFFFF' : s.color; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#FFFFFF'; ctx.stroke();
+          ctx.restore();
+          ctx.fillStyle = '#EEF0FA'; ctx.fillText(s.name, s.x, s.y - 22);
+          for (let k = 0; k < 3; k++) { ctx.fillStyle = k < s.hp ? s.color : '#333851'; ctx.fillRect(s.x - 13 + k * 9, s.y + 20, 7, 4); }
+        }
+        hud.textContent = `Battle #${battleId()}` + (running && !over ? ` · ${ships.filter(s => s.alive).length} left · ${Math.floor(t)}s${t > 25 ? ' · firing faster' : ''}` : '');
+      };
+      const loop = now => {
+        const real = Math.min(.1, (now - last) / 1000); last = now;
+        for (const p of parts) { p.x += p.vx * real; p.y += p.vy * real; p.life -= real; p.vx *= .97; p.vy *= .97; }
+        parts = parts.filter(p => p.life > 0);
+        if (!over) { acc += real * (speedSel ? +speedSel.value : 1); while (acc >= DT && !over) { step(); acc -= DT; } }
+        draw();
+        if (running) raf = requestAnimationFrame(loop);
+      };
+      const play = () => { cancelAnimationFrame(raf); setup(); overlay.hidden = true; running = true; last = performance.now(); raf = requestAnimationFrame(loop); };
+      // full screen: real fullscreen where allowed, otherwise fill the window
+      const isFull = () => document.fullscreenElement === wrapEl || document.webkitFullscreenElement === wrapEl || wrapEl.classList.contains('theatre');
+      const enterFull = () => {
+        const req = wrapEl.requestFullscreen || wrapEl.webkitRequestFullscreen;
+        const fallback = () => { wrapEl.classList.add('theatre'); document.documentElement.style.overflow = 'hidden'; setTimeout(size, 50); };
+        if (req) { try { const p = req.call(wrapEl); if (p && p.catch) p.catch(fallback); } catch { fallback(); } } else fallback();
+        try { screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {}); } catch {}
+      };
+      const exitFull = () => {
+        if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+        wrapEl.classList.remove('theatre'); document.documentElement.style.overflow = ''; setTimeout(size, 50);
+      };
+      const onFs = () => setTimeout(() => { size(); if (!running) draw(); }, 60);
+      document.addEventListener('fullscreenchange', onFs); document.addEventListener('webkitfullscreenchange', onFs);
+      const onKey = e => { if (e.key === 'Escape' && wrapEl.classList.contains('theatre')) exitFull(); }; document.addEventListener('keydown', onKey);
+      $('#bexit').onclick = exitFull;
+      $('#bstart').onclick = () => { if (!isFull()) enterFull(); play(); };
+      $('#bhere').onclick = () => play();
+      overlay.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (!b) return; if (b.dataset.go === 'full' && !isFull()) enterFull(); play(); });
+      // share
+      const refreshShare = () => {
+        if (guest) return;
+        const L = link(), inp = $('#blink');
+        inp.value = L;
+        $('#bwa').href = 'https://wa.me/?text=' + encodeURIComponent(`🚀 Space battle: ${names.length} pilots, one survivor. Everyone who opens this sees the same fight.\n${L}`);
+        $('#bcmsg').textContent = '';
+      };
+      if (!guest) {
+        $('#bcopy').onclick = () => { const inp = $('#blink'), msg = $('#bcmsg');
+          navigator.clipboard.writeText(inp.value).then(() => msg.textContent = 'Copied', () => { inp.focus(); inp.select(); msg.textContent = 'Selected, press copy'; }); };
+        $('#bnew').onclick = () => { newBattle(); };
+      }
+      const newBattle = () => {
+        running = false; cancelAnimationFrame(raf);
+        names = items(); seed = rand(0x7fffffff) + 1; store.set('battleSeed', seed);
+        if (names.length < 2) { names = names.length ? names : []; overlay.hidden = false; overlay.innerHTML = '<span class="sub">Not enough pilots</span><span class="headline">Add at least two names</span>'; ships = []; draw(); return; }
+        setup(); idle(`Battle #${battleId()} · ${names.length} pilots`, 'Ready for launch'); refreshShare();
+      };
+      const ro = new ResizeObserver(() => { size(); if (!running) draw(); }); ro.observe(c);
+      const onList = () => { if (!running && !guest) newBattle(); }; listeners.add(onList);
+      if (guest) { seed = guest.seed; names = guest.names; setup(); idle(`Battle #${battleId()} · ${names.length} pilots`, 'Who will be the last ship flying?'); }
+      else { names = items(); const saved = store.get('battleSeed', 0); if (saved && names.length >= 2) { seed = saved; setup(); idle(`Battle #${battleId()} · ${names.length} pilots`, 'Ready for launch'); refreshShare(); } else newBattle(); }
+      return () => { running = false; cancelAnimationFrame(raf); ro.disconnect(); listeners.delete(onList); document.removeEventListener('fullscreenchange', onFs); document.removeEventListener('webkitfullscreenchange', onFs); document.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; };
+    }
+  };
+
+  // HAT
+  tools.hat = {
+    name: 'Out of a hat', usesList: true,
+    icon: icon('<path d="M4 18h16M6 18l1.5-9h9L18 18M8 9V6.5a4 4 0 0 1 8 0V9"/>'),
+    mount(el){
+      let drawn = [];
+      el.innerHTML = `
+        <div><p class="eyebrow">Draw names</p><h2>Pull one out, it stays out</h2><p class="lede">Each draw removes that name from the hat until you put them all back.</p></div>
+        <div class="center">
+          <div class="slip empty" id="slip" aria-live="polite">The hat is ready</div>
+          <div class="row" style="justify-content:center">
+            <button class="btn big" id="draw" type="button">Draw a name</button>
+            <button class="btn ghost" id="reset" type="button">Put them all back</button>
+          </div>
+          <p class="count" id="left"></p>
+          <div class="chips" id="drawn" style="justify-content:center"></div>
+        </div>`;
+      const slip = el.querySelector('#slip'), left = el.querySelector('#left'), chips = el.querySelector('#drawn'), btn = el.querySelector('#draw');
+      const pool = () => { const all = items(), used = drawn.slice(); return all.filter(x => { const i = used.indexOf(x); if (i > -1) { used.splice(i, 1); return false; } return true; }); };
+      const render = () => {
+        const p = pool(); left.textContent = `${p.length} left in the hat · ${drawn.length} drawn`;
+        btn.disabled = !p.length;
+        chips.innerHTML = drawn.map((d, i) => `<span class="chip"><b>${i + 1}</b>${esc(d)}</span>`).join('');
+      };
+      btn.onclick = () => {
+        const p = pool(); if (!p.length) return;
+        const pick = p[rand(p.length)]; drawn.push(pick);
+        slip.classList.remove('empty', 'pop'); slip.textContent = pick; void slip.offsetWidth;
+        slip.style.transform = `rotate(${rand(7) - 3}deg)`; slip.classList.add('result', 'pop');
+        slip.classList.remove('result');
+        render();
+        if (!pool().length) btn.textContent = 'Hat is empty';
+      };
+      el.querySelector('#reset').onclick = () => { drawn = []; slip.className = 'slip empty'; slip.style.transform = ''; slip.textContent = 'The hat is ready'; btn.textContent = 'Draw a name'; render(); };
+      const onList = () => render(); listeners.add(onList); render();
+      return () => listeners.delete(onList);
+    }
+  };
+
+  // TEAMS
+  tools.teams = {
+    name: 'Teams', usesList: true,
+    icon: icon('<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2.5 19a5.5 5.5 0 0 1 11 0M10.5 19a5.5 5.5 0 0 1 11 0"/>'),
+    mount(el){
+      el.innerHTML = `
+        <div><p class="eyebrow">Split into teams</p><h2>Fair sides, no arguments</h2><p class="lede">Shuffles everyone and deals them out so team sizes differ by one at most.</p></div>
+        <div class="row">
+          <label class="f" for="tn">Teams<input type="number" id="tn" min="2" max="20" value="${store.get('teams', 3)}"></label>
+          <button class="btn" id="make" type="button">Make teams</button>
+        </div>
+        <div class="teams" id="tout"></div>`;
+      const out = el.querySelector('#tout'), tn = el.querySelector('#tn');
+      const make = () => {
+        const list = shuffle(items()); const k = Math.max(2, Math.min(20, parseInt(tn.value) || 2)); store.set('teams', k);
+        if (list.length < k) { out.innerHTML = `<p class="note">Add at least ${k} names to make ${k} teams.</p>`; return; }
+        const teams = Array.from({length: k}, () => []); list.forEach((x, i) => teams[i % k].push(x));
+        out.innerHTML = shuffle(teams).map((t, i) => `<div class="team"><h3><i style="background:${SEG[i % SEG.length]}"></i>Team ${i + 1}</h3><ol>${t.map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>`).join('');
+      };
+      el.querySelector('#make').onclick = make; make();
+    }
+  };
+
+  // ORDER
+  tools.order = {
+    name: 'Running order', usesList: true,
+    icon: icon('<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>'),
+    mount(el){
+      el.innerHTML = `
+        <div><p class="eyebrow">Shuffle the order</p><h2>Who goes first?</h2><p class="lede">For stand-ups, presentations, crit sessions or turns at anything.</p></div>
+        <div class="row"><button class="btn" id="shuf" type="button">Shuffle</button><button class="btn ghost" id="copy" type="button">Copy list</button><span class="note" id="cmsg" aria-live="polite"></span></div>
+        <div class="center"><ol class="order" id="ol"></ol></div>`;
+      const ol = el.querySelector('#ol'); let cur = [];
+      const go = () => { cur = shuffle(items()); ol.innerHTML = cur.length ? cur.map(x => `<li>${esc(x)}</li>`).join('') : '<p class="note">Add some names to your list.</p>'; };
+      el.querySelector('#shuf').onclick = go;
+      el.querySelector('#copy').onclick = () => {
+        const txt = cur.map((x, i) => `${i + 1}. ${x}`).join('\n'), msg = el.querySelector('#cmsg');
+        navigator.clipboard.writeText(txt).then(() => msg.textContent = 'Copied', () => { const r = document.createRange(); r.selectNodeContents(ol); const s = getSelection(); s.removeAllRanges(); s.addRange(r); msg.textContent = 'Selected, press copy'; });
+      };
+      go();
+    }
+  };
+
+  // DICE
+  tools.dice = {
+    name: 'Dice', usesList: false,
+    icon: icon('<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/>'),
+    mount(el){
+      const s = store.get('dice', {n: 2, sides: 6});
+      el.innerHTML = `
+        <div><p class="eyebrow">Roll dice</p><h2>Roll the bones</h2></div>
+        <div class="row">
+          <label class="f" for="dn">How many<input type="number" id="dn" min="1" max="10" value="${s.n}"></label>
+          <label class="f" for="ds">Sides<select id="ds">${[4, 6, 8, 10, 12, 20, 100].map(x => `<option value="${x}" ${x == s.sides ? 'selected' : ''}>d${x}</option>`).join('')}</select></label>
+        </div>
+        <div class="center">
+          <div class="dice" id="dice"></div>
+          <p class="total nums" id="dt" aria-live="polite"></p>
+          <button class="btn big" id="roll" type="button">Roll</button>
+        </div>`;
+      const box = el.querySelector('#dice'), tot = el.querySelector('#dt'), dn = el.querySelector('#dn'), ds = el.querySelector('#ds');
+      const PIPS = {1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+      const face = (v, sides) => sides === 6 ? `<div class="pips">${Array.from({length: 9}, (_, i) => `<i class="${PIPS[v].includes(i) ? 'on' : ''}"></i>`).join('')}</div>` : `<span class="nums">${v}</span>`;
+      let rolling = false;
+      const render = (vals, sides, cls = '') => { box.innerHTML = vals.map(v => `<div class="die ${cls}" aria-label="${v}">${face(v, sides)}</div>`).join(''); };
+      const roll = () => {
+        if (rolling) return;
+        const n = Math.max(1, Math.min(10, parseInt(dn.value) || 1)), sides = +ds.value; store.set('dice', {n, sides});
+        const final = Array.from({length: n}, () => rand(sides) + 1);
+        const done = () => { rolling = false; render(final, sides); tot.textContent = n > 1 ? `Total ${final.reduce((a, b) => a + b, 0)}` : `You rolled ${final[0]}`; };
+        if (reduced) return done();
+        rolling = true; tot.innerHTML = '&nbsp;'; let k = 0;
+        const iv = setInterval(() => { render(Array.from({length: n}, () => rand(sides) + 1), sides, 'rolling'); if (++k > 9) { clearInterval(iv); done(); } }, 70);
+      };
+      el.querySelector('#roll').onclick = roll;
+      render(Array.from({length: s.n}, () => rand(s.sides) + 1), s.sides);
+      tot.textContent = 'Tap roll';
+    }
+  };
+
+  // COIN
+  tools.coin = {
+    name: 'Coin', usesList: false,
+    icon: icon('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/>'),
+    mount(el){
+      let h = 0, t = 0, hist = [], turns = 0, busy = false;
+      el.innerHTML = `
+        <div><p class="eyebrow">Flip a coin</p><h2>Heads or tails</h2></div>
+        <div class="center">
+          <div class="coin-scene"><div class="coin" id="coin"><div class="face h">HEADS</div><div class="face t">TAILS</div></div></div>
+          <p class="result" id="cr" aria-live="polite" style="font-size:36px">&nbsp;</p>
+          <button class="btn big" id="flip" type="button">Flip</button>
+          <div class="tally"><div class="stat"><b id="ch">0</b><span>Heads</span></div><div class="stat"><b id="ct">0</b><span>Tails</span></div><div class="stat"><b id="cs">0</b><span>Streak</span></div></div>
+          <div class="hist" id="chist"></div>
+          <button class="btn ghost small" id="creset" type="button">Reset tally</button>
+        </div>`;
+      const coin = el.querySelector('#coin'), res = el.querySelector('#cr');
+      const render = () => {
+        el.querySelector('#ch').textContent = h; el.querySelector('#ct').textContent = t;
+        let s = 0; for (let i = hist.length - 1; i >= 0 && hist[i] === hist[hist.length - 1]; i--) s++;
+        el.querySelector('#cs').textContent = s;
+        el.querySelector('#chist').innerHTML = hist.slice(-30).map(x => `<i class="${x}">${x}</i>`).join('');
+      };
+      el.querySelector('#flip').onclick = () => {
+        if (busy) return; busy = true; res.innerHTML = '&nbsp;';
+        const heads = rand(2) === 0; turns += 5;
+        const angle = turns * 360 + (heads ? 0 : 180);
+        coin.style.transform = `rotateY(${angle}deg)`;
+        setTimeout(() => { busy = false; heads ? h++ : t++; hist.push(heads ? 'H' : 'T'); res.textContent = heads ? 'Heads' : 'Tails'; res.classList.remove('pop'); void res.offsetWidth; res.classList.add('pop'); render(); }, reduced ? 0 : 1400);
+      };
+      el.querySelector('#creset').onclick = () => { h = t = 0; hist = []; res.innerHTML = '&nbsp;'; render(); };
+    }
+  };
+
+  // NUMBER
+  tools.number = {
+    name: 'Number', usesList: false,
+    icon: icon('<path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/>'),
+    mount(el){
+      const s = store.get('num', {min: 1, max: 100, count: 1, unique: true});
+      el.innerHTML = `
+        <div><p class="eyebrow">Random number</p><h2>Pick a number, any number</h2><p class="lede">Raffle tickets, bingo calls, or which page to open the book on.</p></div>
+        <div class="row">
+          <label class="f" for="nmin">From<input type="number" id="nmin" value="${s.min}"></label>
+          <label class="f" for="nmax">To<input type="number" id="nmax" value="${s.max}"></label>
+          <label class="f" for="ncount">How many<input type="number" id="ncount" min="1" max="100" value="${s.count}"></label>
+          <label class="check" style="align-self:flex-end; padding-bottom:10px"><input type="checkbox" id="nuni" ${s.unique ? 'checked' : ''}> No repeats</label>
+        </div>
+        <div class="center">
+          <p class="result nums" id="nr" aria-live="polite">&nbsp;</p>
+          <button class="btn big" id="ngo" type="button">Generate</button>
+          <p class="note" id="nmsg"></p>
+        </div>`;
+      const out = el.querySelector('#nr'), msg = el.querySelector('#nmsg');
+      const go = () => {
+        let a = parseInt(el.querySelector('#nmin').value), b = parseInt(el.querySelector('#nmax').value);
+        let k = Math.max(1, Math.min(100, parseInt(el.querySelector('#ncount').value) || 1));
+        const uni = el.querySelector('#nuni').checked;
+        if (isNaN(a) || isNaN(b)) { msg.textContent = 'Enter a start and end number.'; return; }
+        if (a > b) [a, b] = [b, a];
+        const span = b - a + 1; msg.textContent = '';
+        if (uni && k > span) { k = span; msg.textContent = `Only ${span} numbers in that range, so showing all of them.`; }
+        store.set('num', {min: a, max: b, count: k, unique: uni});
+        let res = [];
+        if (uni) { const seen = new Set(); while (res.length < k) { const v = a + rand(span); if (!seen.has(v)) { seen.add(v); res.push(v); } } }
+        else res = Array.from({length: k}, () => a + rand(span));
+        out.style.fontSize = k > 1 ? 'clamp(24px,4.5vw,38px)' : '';
+        out.textContent = res.join(k > 1 ? ' · ' : '');
+        out.classList.remove('pop'); void out.offsetWidth; out.classList.add('pop');
+      };
+      el.querySelector('#ngo').onclick = go; go();
+    }
+  };
+
+  // ---------- tabs ----------
+  const tabsEl = document.getElementById('tabs'), toolEl = document.getElementById('tool'), stage = document.getElementById('stage'), listPanel = document.getElementById('listPanel');
+  const order = ['wheel', 'battle', 'hat', 'teams', 'order', 'dice', 'coin', 'number'];
+  tabsEl.innerHTML = order.map(k => `<button class="tab" role="tab" id="tab-${k}" data-k="${k}" aria-selected="false" type="button">${tools[k].icon}${tools[k].name}</button>`).join('');
+  let cleanup = null;
+  let fight = parseFight(location.hash.slice(1));
+  const open = k => {
+    if (!tools[k]) k = 'wheel';
+    const g = k === 'battle' && fight;
+    document.body.classList.toggle('guest', !!g);
+    if (cleanup) { cleanup(); cleanup = null; }
+    tabsEl.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.k === k));
+    const showList = tools[k].usesList && !g;
+    listPanel.hidden = !showList; stage.classList.toggle('solo', !showList);
+    toolEl.innerHTML = ''; cleanup = tools[k].mount(toolEl, g ? {fight, leave: () => { fight = null; open('battle'); }} : {}) || null;
+    if (!g) store.set('tab', k);
+  };
+  tabsEl.addEventListener('click', e => { const b = e.target.closest('.tab'); if (!b) return; if (b.dataset.k !== 'battle') fight = null; open(b.dataset.k); });
+  const hash = location.hash.slice(1);
+  open(fight ? 'battle' : tools[hash] ? hash : store.get('tab', 'wheel'));
+})();
+</script>
+
+</body>
+</html>
