@@ -124,8 +124,8 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
 .arena-wrap{display:flex; flex-direction:column; gap:10px}
 .exitfs,.turn-hint{display:none}
 .arena-wrap.theatre,.arena-wrap:fullscreen{position:fixed; inset:0; z-index:1000; background:#070914; align-items:center; justify-content:center; padding:max(12px, env(safe-area-inset-top, 0px)) 12px max(12px, env(safe-area-inset-bottom, 0px))}
-.arena-wrap:-webkit-full-screen{position:fixed; inset:0; z-index:1000; background:#070914; display:flex; align-items:center; justify-content:center; padding:12px}
-.arena-wrap.theatre .arena,.arena-wrap:fullscreen .arena{width:min(100%, calc((100vh - 90px) * 1.6)); border-color:#22263D}
+.arena-wrap:-webkit-full-screen{position:fixed; inset:0; z-index:1000; background:#070914; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:12px}
+.arena-wrap.theatre .arena,.arena-wrap:fullscreen .arena{width:min(100%, calc((100vh - 170px) * 1.6)); border-color:#22263D}
 .arena-wrap.theatre .exitfs,.arena-wrap:fullscreen .exitfs{display:inline-block; background:#1A1D30; color:#EEF0FA; border-color:#33384F}
 @media (orientation:portrait){ .arena-wrap.theatre .turn-hint,.arena-wrap:fullscreen .turn-hint{display:block; color:#A2A7C2; font-size:13px; margin:0} }
 .ticker{position:absolute; left:0; right:0; bottom:8px; text-align:center; font:700 13px var(--body); color:#EEF0FA; text-shadow:0 1px 3px #000; pointer-events:none; padding:0 12px}
@@ -137,7 +137,45 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
 .overlay .headline{font:800 clamp(28px,6vw,54px)/1.05 var(--display); letter-spacing:-.02em; overflow-wrap:anywhere}
 .overlay .sub{font:600 13px var(--body); text-transform:uppercase; letter-spacing:.14em; color:#A2A7C2}
 .hud{position:absolute; left:10px; top:10px; font:700 12px var(--mono); color:#A2A7C2; pointer-events:none}
-.bgrid{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px}
+.bgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px}
+.podium{list-style:none; margin:4px 0 0; padding:0; display:flex; flex-direction:column; gap:8px; width:min(100%,460px)}
+.podium li{display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:baseline; gap:12px; padding:8px 14px; border-radius:12px; background:rgba(255,255,255,.07); text-align:left; animation:rise .6s cubic-bezier(.2,1.4,.4,1) backwards}
+.podium .rn{font:700 11px var(--mono); letter-spacing:.1em; text-transform:uppercase; color:#A2A7C2}
+.podium .nm{font:800 clamp(20px,3.6vw,32px)/1.1 var(--display); overflow-wrap:anywhere}
+.podium .ko{font:600 12px var(--body); color:#A2A7C2}
+@keyframes rise{from{opacity:0; transform:translateY(14px) scale(.96)}to{opacity:1; transform:none}}
+.overlay{overflow-y:auto; z-index:2}
+.confetti{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:3}
+.count-big{font:800 clamp(64px,14vw,150px)/1 var(--display); color:#FFC53D; animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+.ptabs-label{margin:0; font:600 11px var(--body); text-transform:uppercase; letter-spacing:.12em; color:var(--muted)}
+.ptabs{display:flex; gap:6px; overflow-x:auto; padding:2px 2px 6px; scrollbar-width:thin; max-width:100%}
+.ptab{flex:0 0 auto; display:flex; align-items:center; gap:7px; border:1px solid var(--line); background:var(--surface-2); color:var(--ink); border-radius:999px; padding:8px 13px; font:600 13px var(--body); cursor:pointer}
+.ptab i{width:9px; height:9px; border-radius:50%; display:inline-block}
+.ptab .st{font:700 11px var(--mono); opacity:.7}
+.ptab.out{opacity:.5}
+.ptab[aria-pressed="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink); opacity:1}
+.arena-wrap.theatre .ptabs,.arena-wrap:fullscreen .ptabs,.arena-wrap.theatre .ptabs-label,.arena-wrap:fullscreen .ptabs-label{width:min(100%, calc((100vh - 170px) * 1.6))}
+.fs-side{display:none}
+@media (orientation:landscape){
+  .arena-wrap.theatre,.arena-wrap:fullscreen{display:grid; grid-template-columns:auto 240px; justify-content:center; align-content:center; column-gap:14px; row-gap:8px}
+  .arena-wrap.theatre > *,.arena-wrap:fullscreen > *{grid-column:1}
+  .arena-wrap.theatre .fs-side,.arena-wrap:fullscreen .fs-side{display:flex; grid-column:2; grid-row:1 / span 3}
+  .arena-wrap.theatre .exitfs,.arena-wrap:fullscreen .exitfs{grid-column:1 / -1; justify-self:center}
+  .arena-wrap.theatre .arena,.arena-wrap:fullscreen .arena,.arena-wrap.theatre .ptabs,.arena-wrap:fullscreen .ptabs,.arena-wrap.theatre .ptabs-label,.arena-wrap:fullscreen .ptabs-label{width:min(calc(100vw - 290px), calc((100vh - 170px) * 1.6))}
+}
+.fs-side{flex-direction:column; gap:10px; background:#11142A; border:1px solid #22263D; border-radius:14px; padding:14px; color:#EEF0FA; max-height:calc(100vh - 110px); overflow-y:auto; min-width:0}
+.fs-side h3{margin:0; font:600 11px var(--body); text-transform:uppercase; letter-spacing:.12em; color:#A2A7C2; display:flex; justify-content:space-between}
+.fs-side h3 b{font:700 12px var(--mono); color:#EEF0FA}
+.fs-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px}
+.fs-list li{display:grid; grid-template-columns:10px minmax(0,1fr) auto; align-items:center; gap:8px; padding:6px 8px; border-radius:8px; font:600 14px var(--body)}
+.fs-list li span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.fs-list li i{width:10px; height:10px; border-radius:50%}
+.fs-list li em{font:700 11px var(--mono); font-style:normal; color:#A2A7C2}
+.fs-list li.me{background:#EEF0FA; color:#070914}
+.fs-list li.me em{color:#070914}
+.arena-wrap.theatre .ptab,.arena-wrap:fullscreen .ptab{background:#1A1D30; color:#EEF0FA; border-color:#33384F}
+.arena-wrap.theatre .ptab[aria-pressed="true"],.arena-wrap:fullscreen .ptab[aria-pressed="true"]{background:#EEF0FA; color:#070914}
+.arena-wrap.theatre .ptabs-label,.arena-wrap:fullscreen .ptabs-label{color:#A2A7C2}
 @media (max-width:560px){ .bgrid{grid-template-columns:minmax(0,1fr)} }
 .feed{margin:0; padding-left:0; list-style:none; display:flex; flex-direction:column; gap:4px; font-size:14px; max-height:220px; overflow-y:auto}
 .feed li{display:flex; gap:8px; align-items:baseline}
@@ -146,6 +184,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
 .chip i.dot{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px}
 .note{font-size:13px; color:var(--muted); margin:0}
 @media (prefers-reduced-motion: reduce){
+  .podium li{animation:none}
   .coin{transition:none} .die.rolling{animation:none} .result.pop{animation:none}
 }
 </style>
@@ -196,14 +235,14 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
   };
 
   // ---------- shared list ----------
-  const SAMPLE = ['Rob', 'Sarah', 'Marc', 'Rosey', 'Donna + Das', 'Eric', 'Lucille', 'Helen', 'Luke', 'Angel', 'Dotty', 'Jamie', 'Alex'];
+  const SAMPLE = ['Rob', 'Sarah', 'Marc', 'Rosey', 'Donna + Daz', 'Eric', 'Lucille', 'Helen', 'Luke', 'Angel', 'Dotty', 'Jamie', 'Alex'];
   const listInput = document.getElementById('listInput');
   const listCount = document.getElementById('listCount');
-  listInput.value = store.get('list-v2', SAMPLE.join('\n'));
+  listInput.value = store.get('list-v3', SAMPLE.join('\n'));
   const items = () => listInput.value.split('\n').map(s => s.trim()).filter(Boolean);
   const listeners = new Set();
   const updateCount = () => { const n = items().length; listCount.textContent = n + (n === 1 ? ' entry' : ' entries'); };
-  listInput.addEventListener('input', () => { store.set('list-v2', listInput.value); updateCount(); listeners.forEach(f => f()); });
+  listInput.addEventListener('input', () => { store.set('list-v3', listInput.value); updateCount(); listeners.forEach(f => f()); });
   document.getElementById('clearList').addEventListener('click', () => { listInput.value = ''; listInput.dispatchEvent(new Event('input')); listInput.focus(); });
   document.getElementById('resetList').addEventListener('click', () => { listInput.value = SAMPLE.join('\n'); listInput.dispatchEvent(new Event('input')); });
   updateCount();
@@ -302,7 +341,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
     mount(el, opts = {}){
       const guest = opts.fight || null;
       el.innerHTML = `
-        <div><p class="eyebrow">Last ship flying</p><h2>Space battle</h2><p class="lede">${guest ? `${guest.names.length} pilots, three shields each, one survivor. Everyone with this link watches exactly the same fight.` : 'Every name gets a ship with three shields. They steer and fire at random, asteroids get in the way, and the last one left wins. Share the battle and everyone who opens the link watches the identical fight.'}</p></div>
+        <div><p class="eyebrow">Last ship flying</p><h2>Space battle</h2><p class="lede">${guest ? `${guest.names.length} pilots, three rounds. Each round's winner sits out the next, and the three winners are revealed at the end. Everyone with this link watches exactly the same battle.` : 'Every name gets a ship with three shields. They steer and fire at random, asteroids get in the way, and the last one flying wins the round. There are three rounds, and each winner sits out the rounds after, so you end up with three different winners. Share it and everyone who opens the link watches the identical battle.'}</p></div>
         <div class="row">
           <button class="btn" id="bstart" type="button">Watch in full screen</button>
           <button class="btn ghost" id="bhere" type="button">Watch here</button>
@@ -310,44 +349,54 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
           ${guest ? '' : '<label class="f" for="bspeed" style="flex-direction:row; align-items:center; gap:8px">Speed<select id="bspeed" style="width:auto">' + SPEEDS.map(v => `<option value="${v}">${v}×</option>`).join('') + '</select></label>'}
         </div>
         <div class="arena-wrap" id="awrap">
-          <div class="arena" id="arena"><canvas id="bc" aria-label="Space battle arena"></canvas><div class="hud" id="hud"></div><div class="ticker" id="ticker" aria-live="polite"></div><div class="overlay" id="bo"></div></div>
+          <div class="arena" id="arena"><canvas id="bc" aria-label="Space battle arena"></canvas><div class="hud" id="hud"></div><div class="ticker" id="ticker" aria-live="polite"></div><div class="overlay" id="bo"></div><canvas class="confetti" id="conf" aria-hidden="true"></canvas></div>
+          <aside class="fs-side" aria-label="Still flying"><h3>Still flying <b id="fscount"></b></h3><ol class="fs-list" id="fsalive"></ol><h3 id="fswh">Round winners</h3><ol class="fs-list" id="fswin"></ol></aside>
+          <p class="ptabs-label">Tap your name to follow your ship</p>
+          <div class="ptabs" id="ptabs" aria-label="Follow a player"></div>
           <button class="btn ghost small exitfs" id="bexit" type="button">Exit full screen</button>
           <p class="turn-hint">Turn your phone sideways for a bigger view</p>
         </div>
         ${guest ? '' : `<div class="share">
-          <div><p class="eyebrow">Share this battle</p><p class="note" style="margin-top:6px">Send the link once. Everyone who opens it sees the same ships, the same shots and the same winner, at the speed you pick here. Speed only changes the pace, never the result.</p></div>
+          <div><p class="eyebrow">Share this battle</p><p class="note" style="margin-top:6px">Send the link once. Everyone who opens it sees the same ships, the same shots and the same three winners, at the speed you pick here. Speed only changes the pace, never the result.</p></div>
           <input id="blink" readonly aria-label="Battle link">
           <div class="row"><a class="btn wa" id="bwa" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn ghost" id="bcopy" type="button">Copy link</button><span class="note" id="bcmsg" aria-live="polite"></span></div>
         </div>`}
         <div class="bgrid">
           <div><p class="eyebrow" style="margin-bottom:8px">Still flying</p><div class="chips" id="alive"></div></div>
-          <div><p class="eyebrow" style="margin-bottom:8px">Knockouts</p><ol class="feed" id="feed"></ol></div>
+          <div><p class="eyebrow" style="margin-bottom:8px" id="kohead">Knockouts</p><ol class="feed" id="feed"></ol></div>
+          <div><p class="eyebrow" style="margin-bottom:8px">Round winners</p><ol class="feed" id="rwin"></ol></div>
         </div>
 `;
       const $ = s => el.querySelector(s);
       const c = $('#bc'), ctx = c.getContext('2d'), overlay = $('#bo'), hud = $('#hud'), ticker = $('#ticker'), wrapEl = $('#awrap');
       const aliveEl = $('#alive'), feedEl = $('#feed'), speedSel = $('#bspeed');
+      const BCOL = ['#5B6CFF', '#FFC53D', '#FF5C8A', '#17C2AE', '#FF8A3D', '#A970FF', '#7BE36B', '#FF4D4D', '#3CC8FF', '#E6E8F2', '#C9A27A', '#FF9DE2', '#B8F500', '#8A96B8'];
+      const colorOf = n => BCOL[names.indexOf(n) % BCOL.length];
       const W = 1000, H = 625, DT = 1 / 120, DRAG = 0.9924, TAU = Math.PI * 2, U = 1024;
       const COS = new Float64Array(U), SIN = new Float64Array(U);
       for (let i = 0; i < U; i++) { COS[i] = Math.round(Math.cos(i / U * TAU) * 1e9) / 1e9; SIN[i] = Math.round(Math.sin(i / U * TAU) * 1e9) / 1e9; }
       const ix = a => ((Math.floor(a) % U) + U) % U;
       const mulberry = seed => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
       const V = Math.random; // visuals only, never the simulation
-      let R, seed, names, ships = [], bullets = [], rocks = [], parts = [], outs = [], t = 0, over = false, running = false, raf = 0, last = 0, acc = 0, scale = 1;
+      let R, seed, names, round = 0, roundWinners = [], timer = 0, paused = false, focus = store.get('battleFocus', ''), conf = [], confRaf = 0, confTimers = [], ships = [], bullets = [], rocks = [], parts = [], outs = [], t = 0, over = false, running = false, raf = 0, last = 0, acc = 0, scale = 1;
       const stars = Array.from({length: 150}, () => ({x: V() * W, y: V() * H, s: V() * 1.4 + .3, a: V() * .6 + .2}));
       const wrap = o => { o.x = (o.x + W) % W; o.y = (o.y + H) % H; };
       const size = () => { const w = c.clientWidth, h = c.clientHeight, d = devicePixelRatio || 1; if (!w) return; c.width = w * d; c.height = h * d; scale = w / W; ctx.setTransform(d * scale, 0, 0, d * scale, 0, 0); };
       const makeRock = (x, y, r) => { const n = 9 + Math.floor(R() * 4); return {x, y, r, vx: (R() - .5) * 60, vy: (R() - .5) * 60, a: 0, va: (R() - .5) * 1.2, pts: Array.from({length: n}, () => .72 + R() * .35)}; };
       const edgeRock = () => { const side = Math.floor(R() * 4), p = R(); return makeRock(side % 2 ? p * W : (side ? W - 1 : 0), side % 2 ? (side === 1 ? 0 : H - 1) : p * H, 28 + R() * 22); };
       const battleId = () => seed.toString(36).toUpperCase();
+      const totalRounds = () => Math.max(1, Math.min(3, names.length - 1));
+      const roundSeed = r => r === 0 ? seed : (Math.imul(seed, 2654435761) + Math.imul(r, 0x6D2B79F5)) >>> 0;
+      const rosterFor = r => { const list = names.slice(); for (const w of roundWinners.slice(0, r)) { const i = list.indexOf(w.name); if (i > -1) list.splice(i, 1); } return list; };
+      const ord = n => ['First', 'Second', 'Third'][n] || `Round ${n + 1}`;
       const speed = () => speedSel ? +speedSel.value : guest.speed;
       const link = () => `${ART_URL}#fight.${seed.toString(36)}.${encNames(names)}.${speedCode(speed())}`;
       const setup = () => {
-        R = mulberry(seed);
-        const order = names.slice(); for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+        R = mulberry(roundSeed(round));
+        const order = rosterFor(round); for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
         const n = order.length, off = Math.floor(R() * U);
         ships = order.map((name, i) => { const k = ix(off + i * U / n);
-          return {name, color: SEG[names.indexOf(name) % SEG.length], x: W / 2 + COS[k] * W * .36, y: H / 2 + SIN[k] * H * .36, a: R() * U, vx: 0, vy: 0, hp: 3, turn: 0, turnT: 0, thrustT: 0, fireT: .5 + R() * 1.5, inv: 1, flash: 0, alive: true, kills: 0}; });
+          return {name, color: colorOf(name), x: W / 2 + COS[k] * W * .36, y: H / 2 + SIN[k] * H * .36, a: R() * U, vx: 0, vy: 0, hp: 3, turn: 0, turnT: 0, thrustT: 0, fireT: .5 + R() * 1.5, inv: 1, flash: 0, alive: true, kills: 0}; });
         bullets = []; parts = []; outs = []; t = 0; over = false; acc = 0;
         rocks = Array.from({length: 4}, () => makeRock(W / 2 + (R() - .5) * 120, H / 2 + (R() - .5) * 80, 30 + R() * 20));
         ticker.textContent = ''; renderSide(); draw();
@@ -358,13 +407,30 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
         const place = ships.filter(x => x.alive).length + 1;
         const text = by === 'rock' ? `${s.name} flew into an asteroid` : `${s.name} was blasted by ${by.name}`;
         outs.push({s, place, text}); if (by && by.name) by.kills++;
-        ticker.textContent = `#${place} ${text}`; renderSide();
+        ticker.textContent = (s.name === focus ? "That's you! " : '') + `#${place} ${text}`; renderSide();
       };
       const hit = (s, by) => { if (s.inv > 0 || !s.alive) return; s.hp--; s.flash = .25; s.inv = .35; boom(s.x, s.y, s.color, 8); if (s.hp <= 0) knockout(s, by); else renderSide(); };
       const renderSide = () => {
         const alive = ships.filter(s => s.alive);
         aliveEl.innerHTML = alive.map(s => `<span class="chip"><i class="dot" style="background:${s.color}"></i>${esc(s.name)}<span class="hp">${'●'.repeat(s.hp)}${'○'.repeat(3 - s.hp)}</span></span>`).join('') || '<span class="note">Nobody.</span>';
+        renderTabs();
+        $('#fscount').textContent = alive.length;
+        $('#fsalive').innerHTML = alive.map(s => `<li class="${s.name === focus ? 'me' : ''}"><i style="background:${s.color}"></i><span>${esc(s.name)}${s.name === focus ? ' (you)' : ''}</span><em>${'●'.repeat(s.hp)}${'○'.repeat(3 - s.hp)}</em></li>`).join('') || '<li><span>Nobody</span></li>';
+        $('#fswh').hidden = !roundWinners.length;
+        $('#fswin').innerHTML = roundWinners.map((w, i) => `<li class="${w.name === focus ? 'me' : ''}"><i style="background:${w.color}"></i><span>${esc(w.name)}</span><em>R${i + 1}</em></li>`).join('');
+        $('#kohead').textContent = `Knockouts · round ${round + 1}`;
+        $('#rwin').innerHTML = roundWinners.length ? roundWinners.map((w, i) => `<li><b>R${i + 1}</b><span><i class="dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:${w.color}"></i>${esc(w.name)}</span></li>`).join('') : `<li class="note">${totalRounds()} round${totalRounds() === 1 ? '' : 's'} to play.</li>`;
         feedEl.innerHTML = outs.length ? outs.slice().reverse().map(o => `<li><b>#${o.place}</b><span>${esc(o.text)}</span></li>`).join('') : '<li class="note">Nobody down yet.</li>';
+      };
+      const renderTabs = () => {
+        const tabs = $('#ptabs'), keep = tabs.scrollLeft;
+        tabs.innerHTML = names.map(n => {
+          const wi = roundWinners.findIndex(w => w.name === n), s = ships.find(x => x.name === n), o = outs.find(x => x.s.name === n);
+          const st = wi > -1 && wi < round || (wi > -1 && over && wi === round) ? `Won R${wi + 1}` : s ? (s.alive ? '●'.repeat(s.hp) + '○'.repeat(3 - s.hp) : o ? `Out #${o.place}` : 'Out') : '';
+          const out = s && !s.alive || (wi > -1 && wi < round);
+          return `<button class="ptab${out ? ' out' : ''}" type="button" data-p="${esc(n)}" aria-pressed="${focus === n}"><i style="background:${colorOf(n)}"></i>${esc(n)}<span class="st">${st}</span></button>`;
+        }).join('');
+        tabs.scrollLeft = keep;
       };
       // fixed-step, seeded simulation: identical on every device
       const step = () => {
@@ -408,42 +474,89 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
       };
       const finish = winner => {
         over = true;
-        if (outs.length && outs[outs.length - 1].s === winner) { outs.pop(); renderSide(); }
-        ticker.textContent = '';
-        overlay.hidden = false;
-        overlay.innerHTML = `<span class="sub">Battle #${battleId()} · last ship flying</span><span class="headline" style="color:${winner.color}">${esc(winner.name)}</span><span class="sub">${winner.kills} knockout${winner.kills === 1 ? '' : 's'} · ${Math.round(t)} seconds</span><div class="row" style="justify-content:center"><button class="btn ghost" data-go="here" type="button">Watch it again</button></div>`;
-        setTimeout(() => { if (over) running = false; }, 2500);
+        if (outs.length && outs[outs.length - 1].s === winner) { outs.pop(); }
+        roundWinners[round] = {name: winner.name, color: winner.color, kills: winner.kills, secs: Math.round(t)};
+        ticker.textContent = ''; renderSide(); overlay.hidden = false;
+        const total = totalRounds();
+        if (round + 1 < total) {
+          overlay.innerHTML = `<span class="sub">Round ${round + 1} of ${total} · winner</span><span class="headline" style="color:${winner.color}">${esc(winner.name)}${winner.name === focus ? ' (you!)' : ''}</span><span class="sub">${winner.kills} knockout${winner.kills === 1 ? '' : 's'} · sits out the rest of the battle</span>`;
+          confetti([winner.color, '#FFFFFF'], 70);
+          timer = setTimeout(() => { round++; setup(); countdown(`Round ${round + 1} of ${total}`); }, 3500);
+        } else finale();
       };
+      const finale = () => {
+        clearTimeout(timer);
+        overlay.innerHTML = `<span class="sub">Battle #${battleId()} · the winners</span><ol class="podium">${roundWinners.map((w, i) => `<li style="animation-delay:${0.5 + i * 1.1}s"><span class="rn">${ord(i)}</span><span class="nm" style="color:${w.color}">${esc(w.name)}${w.name === focus ? ' (you!)' : ''}</span><span class="ko">${w.kills} KO</span></li>`).join('')}</ol><div class="row" style="justify-content:center; animation:rise .5s ${0.5 + roundWinners.length * 1.1}s backwards"><button class="btn ghost" data-go="here" type="button">Watch it again</button></div>`;
+        roundWinners.forEach((w, i) => confTimers.push(setTimeout(() => confetti([w.color, '#FFFFFF'], 60), (0.5 + i * 1.1) * 1000)));
+        confTimers.push(setTimeout(() => confetti([...roundWinners.map(w => w.color), '#FFC53D', '#FFFFFF'], 260), (0.5 + roundWinners.length * 1.1) * 1000));
+        timer = setTimeout(() => { if (over) running = false; }, 2500);
+      };
+      const countdown = label => {
+        let n = 3; paused = true; clearTimeout(timer);
+        const tick = () => {
+          overlay.hidden = false;
+          overlay.innerHTML = `<span class="sub">${label}</span><span class="count-big">${n || 'Go!'}</span>`;
+          if (n > 0) { n--; timer = setTimeout(tick, 900); }
+          else timer = setTimeout(() => { overlay.hidden = true; paused = false; }, 550);
+        };
+        tick();
+      };
+      const cc = $('#conf'), cctx = cc.getContext('2d');
+      const confetti = (colors, n) => {
+        if (reduced) return;
+        const w = cc.clientWidth, h = cc.clientHeight, d = devicePixelRatio || 1; if (!w) return;
+        if (!confRaf) { cc.width = w * d; cc.height = h * d; cctx.setTransform(d, 0, 0, d, 0, 0); }
+        for (let i = 0; i < n; i++) conf.push({x: V() * w, y: -10 - V() * h * .35, vx: (V() - .5) * 140, vy: 40 + V() * 140, r: V() * TAU, vr: (V() - .5) * 12, w: 6 + V() * 6, h: 3 + V() * 4, c: colors[i % colors.length], life: 3 + V() * 2.5});
+        if (confRaf) return;
+        let lt = performance.now();
+        const frame = now => {
+          const dt = Math.min(.05, (now - lt) / 1000); lt = now;
+          const cw = cc.width / d, ch = cc.height / d; cctx.clearRect(0, 0, cw, ch);
+          for (const p of conf) { p.vy = Math.min(p.vy + 260 * dt, 240); p.x += (p.vx + Math.sin(p.r) * 30) * dt; p.y += p.vy * dt; p.r += p.vr * dt; p.life -= dt;
+            cctx.save(); cctx.translate(p.x, p.y); cctx.rotate(p.r); cctx.globalAlpha = Math.max(0, Math.min(1, p.life)); cctx.fillStyle = p.c; cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); cctx.restore(); }
+          conf = conf.filter(p => p.life > 0 && p.y < ch + 20);
+          confRaf = conf.length ? requestAnimationFrame(frame) : (cctx.clearRect(0, 0, cw, ch), 0);
+        };
+        confRaf = requestAnimationFrame(frame);
+      };
+      const stopConfetti = () => { confTimers.forEach(clearTimeout); confTimers = []; cancelAnimationFrame(confRaf); confRaf = 0; conf = []; cctx.clearRect(0, 0, cc.width, cc.height); };
+      $('#ptabs').addEventListener('click', e => { const b = e.target.closest('.ptab'); if (!b) return; focus = focus === b.dataset.p ? '' : b.dataset.p; store.set('battleFocus', focus); renderSide(); if (!running) draw(); });
       const draw = () => {
         ctx.fillStyle = '#070914'; ctx.fillRect(0, 0, W, H);
         for (const s of stars) { ctx.globalAlpha = s.a; ctx.fillStyle = '#fff'; ctx.fillRect(s.x, s.y, s.s, s.s); }
         ctx.globalAlpha = 1; ctx.lineWidth = 2; ctx.strokeStyle = '#8990AE';
         for (const r of rocks) { ctx.beginPath(); r.pts.forEach((p, i) => { const a = r.a + i / r.pts.length * TAU; const x = r.x + Math.cos(a) * r.r * p, y = r.y + Math.sin(a) * r.r * p; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath(); ctx.fillStyle = '#161A2E'; ctx.fill(); ctx.stroke(); }
-        for (const b of bullets) { ctx.fillStyle = b.owner.color; ctx.beginPath(); ctx.arc(b.x, b.y, 2.6, 0, TAU); ctx.fill(); }
+        const hasFocus = focus && ships.some(s => s.name === focus && s.alive);
+        for (const b of bullets) { ctx.globalAlpha = hasFocus && b.owner.name !== focus ? .5 : 1; ctx.fillStyle = b.owner.color; ctx.beginPath(); ctx.arc(b.x, b.y, 2.6, 0, TAU); ctx.fill(); }
         for (const p of parts) { ctx.globalAlpha = Math.min(1, p.life * 2); ctx.fillStyle = p.color; ctx.fillRect(p.x - 1.5, p.y - 1.5, 3, 3); }
         ctx.globalAlpha = 1;
         ctx.font = `700 ${Math.max(15, 12 / scale)}px Figtree, system-ui, sans-serif`; ctx.textAlign = 'center';
+        ctx.globalAlpha = 1;
         for (const s of ships) {
           if (!s.alive) continue;
+          const me = hasFocus && s.name === focus;
+          ctx.globalAlpha = hasFocus && !me ? .42 : 1;
+          if (me) { const pr = 30 + Math.sin(performance.now() / 180) * 4; ctx.beginPath(); ctx.arc(s.x, s.y, pr, 0, TAU); ctx.lineWidth = 3; ctx.strokeStyle = '#FFFFFF'; ctx.stroke(); ctx.beginPath(); ctx.arc(s.x, s.y, pr + 7, 0, TAU); ctx.lineWidth = 1.5; ctx.strokeStyle = s.color; ctx.stroke(); }
           ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.a / U * TAU); ctx.scale(1.35, 1.35);
           if (s.thrustT > 0) { ctx.fillStyle = '#FFC53D'; ctx.beginPath(); ctx.moveTo(-9, -4); ctx.lineTo(-15 - V() * 8, 0); ctx.lineTo(-9, 4); ctx.fill(); }
           ctx.beginPath(); ctx.moveTo(16, 0); ctx.lineTo(-10, -10); ctx.lineTo(-6, 0); ctx.lineTo(-10, 10); ctx.closePath();
           ctx.fillStyle = s.flash > 0 ? '#FFFFFF' : s.color; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#FFFFFF'; ctx.stroke();
           ctx.restore();
-          ctx.fillStyle = '#EEF0FA'; ctx.fillText(s.name, s.x, s.y - 22);
+          ctx.fillStyle = me ? '#FFC53D' : '#EEF0FA'; ctx.fillText(me ? `${s.name} (you)` : s.name, s.x, s.y - (me ? 40 : 22));
           for (let k = 0; k < 3; k++) { ctx.fillStyle = k < s.hp ? s.color : '#333851'; ctx.fillRect(s.x - 13 + k * 9, s.y + 20, 7, 4); }
         }
-        hud.textContent = `Battle #${battleId()}` + (running && !over ? ` · ${ships.filter(s => s.alive).length} left · ${Math.floor(t)}s${t > 25 ? ' · firing faster' : ''}` : '');
+        ctx.globalAlpha = 1;
+        hud.textContent = `Battle #${battleId()}` + (running && !over ? ` · Round ${round + 1} of ${totalRounds()} · ${ships.filter(s => s.alive).length} left · ${Math.floor(t)}s${t > 25 ? ' · firing faster' : ''}` : '');
       };
       const loop = now => {
         const real = Math.min(.1, (now - last) / 1000); last = now;
         for (const p of parts) { p.x += p.vx * real; p.y += p.vy * real; p.life -= real; p.vx *= .97; p.vy *= .97; }
         parts = parts.filter(p => p.life > 0);
-        if (!over) { acc += real * speed(); while (acc >= DT && !over) { step(); acc -= DT; } }
+        if (!over && !paused) { acc += real * speed(); while (acc >= DT && !over) { step(); acc -= DT; } }
         draw();
         if (running) raf = requestAnimationFrame(loop);
       };
-      const play = () => { cancelAnimationFrame(raf); setup(); overlay.hidden = true; running = true; last = performance.now(); raf = requestAnimationFrame(loop); };
+      const play = () => { cancelAnimationFrame(raf); clearTimeout(timer); stopConfetti(); round = 0; roundWinners = []; setup(); countdown(`Round 1 of ${totalRounds()}`); running = true; last = performance.now(); raf = requestAnimationFrame(loop); };
       // full screen: real fullscreen where allowed, otherwise fill the window
       const isFull = () => document.fullscreenElement === wrapEl || document.webkitFullscreenElement === wrapEl || wrapEl.classList.contains('theatre');
       const enterFull = () => {
@@ -477,17 +590,17 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
         $('#bnew').onclick = () => { newBattle(); };
       }
       const newBattle = () => {
-        running = false; cancelAnimationFrame(raf);
+        running = false; paused = false; cancelAnimationFrame(raf); clearTimeout(timer); stopConfetti(); round = 0; roundWinners = [];
         names = items(); seed = rand(0x7fffffff) + 1; store.set('battleSeed', seed);
         if (names.length < 2) { names = names.length ? names : []; overlay.hidden = false; overlay.innerHTML = '<span class="sub">Not enough pilots</span><span class="headline">Add at least two names</span>'; ships = []; draw(); return; }
-        setup(); idle(`Battle #${battleId()} · ${names.length} pilots`, 'Ready for launch'); refreshShare();
+        setup(); idle(`Battle #${battleId()} · ${names.length} pilots · ${totalRounds()} rounds`, 'Ready for launch'); refreshShare();
       };
       const ro = new ResizeObserver(() => { size(); if (!running) draw(); }); ro.observe(c);
       if (speedSel) { const sv = store.get('battleSpeed', DEFAULT_SPEED); speedSel.value = String(SPEEDS.includes(sv) ? sv : DEFAULT_SPEED); speedSel.onchange = () => { store.set('battleSpeed', +speedSel.value); refreshShare(); }; }
       const onList = () => { if (!running && !guest) newBattle(); }; listeners.add(onList);
-      if (guest) { seed = guest.seed; names = guest.names; setup(); idle(`Battle #${battleId()} · ${names.length} pilots`, 'Who will be the last ship flying?'); }
-      else { names = items(); const saved = store.get('battleSeed', 0); if (saved && names.length >= 2) { seed = saved; setup(); idle(`Battle #${battleId()} · ${names.length} pilots`, 'Ready for launch'); refreshShare(); } else newBattle(); }
-      return () => { running = false; cancelAnimationFrame(raf); ro.disconnect(); listeners.delete(onList); document.removeEventListener('fullscreenchange', onFs); document.removeEventListener('webkitfullscreenchange', onFs); document.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; };
+      if (guest) { seed = guest.seed; names = guest.names; setup(); idle(`Battle #${battleId()} · ${names.length} pilots · ${totalRounds()} rounds`, 'Who will be the last ships flying?'); }
+      else { names = items(); const saved = store.get('battleSeed', 0); if (saved && names.length >= 2) { seed = saved; setup(); idle(`Battle #${battleId()} · ${names.length} pilots · ${totalRounds()} rounds`, 'Ready for launch'); refreshShare(); } else newBattle(); }
+      return () => { running = false; cancelAnimationFrame(raf); clearTimeout(timer); stopConfetti(); ro.disconnect(); listeners.delete(onList); document.removeEventListener('fullscreenchange', onFs); document.removeEventListener('webkitfullscreenchange', onFs); document.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; };
     }
   };
 
