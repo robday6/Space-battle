@@ -9,7 +9,7 @@ Everything is in one file, `index.html`. There's no build step, no server code a
 | Tab | What it does |
 |---|---|
 | Wheel | Spin a wheel of names. Can remove the winner after each spin. |
-| Space battle | Asteroids-style free-for-all. Shareable, and plays identically for everyone. |
+| Space battle | Asteroids-style free-for-all over three rounds. Shareable, and plays identically for everyone. |
 | Out of a hat | Draw names one at a time without putting them back. |
 | Teams | Split the list into 2 to 20 teams of near-equal size. |
 | Running order | Shuffle the list into a numbered order, with a copy button. |
@@ -32,9 +32,9 @@ Full details are in the docs:
 
 ## Default list
 
-Rob, Sarah, Marc, Rosey, Donna + Das, Eric, Lucille, Helen, Luke, Angel, Dotty, Jamie, Alex
+Rob, Sarah, Marc, Rosey, Donna + Daz, Eric, Lucille, Helen, Luke, Angel, Dotty, Jamie, Alex
 
-"Donna + Das" is a single entry, so they share one ship and one team slot.
+"Donna + Daz" is a single entry, so they share one ship and one team slot.
 
 The default list is set in the `SAMPLE` array in `index.html`. The "Reset to crew" button restores it.
 
@@ -44,12 +44,13 @@ Each viewer's browser keeps its own settings in `localStorage`, under keys that 
 
 | Key | Holds |
 |---|---|
-| `list-v2` | The name list |
+| `list-v3` | The name list |
 | `tab` | The last tab opened |
 | `teams` | The number of teams |
 | `dice` | Dice count and number of sides |
 | `num` | Number picker settings |
 | `battleSeed` | The current Space battle ID |
 | `battleSpeed` | The chosen Space battle speed |
+| `battleFocus` | The player this viewer is following |
 
 Nothing is sent to a server. If storage is blocked, as in some private windows, the page still works but forgets these between visits.

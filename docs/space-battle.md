@@ -1,6 +1,6 @@
 # Space battle
 
-The last ship flying wins. The ships fly and shoot at random, so nobody controls the outcome. Every ship gets the same stats.
+Three rounds, and the last ship flying wins each one. The ships fly and shoot at random, so nobody controls the outcome. Every ship gets the same stats.
 
 ## How to run one
 
@@ -9,6 +9,33 @@ The last ship flying wins. The ships fly and shoot at random, so nobody controls
 3. Pick a **Speed**: 0.5×, 0.75× (the default), 1×, 2× or 4×. The speed goes into the link, so everyone watches at the pace you chose.
 4. Share it using **Send on WhatsApp** or **Copy link**.
 5. Watch it using **Watch in full screen** or **Watch here**.
+
+## Rounds
+
+- A battle has **3 rounds**. The winner of each round sits out the rounds after it, so you get three different winners.
+- With 3 names there are 2 rounds, and with 2 names there is 1.
+- Every round starts with a **3, 2, 1, Go!** countdown, with the ships in place and the fight paused.
+- When a round ends, the winner is shown for 3.5 seconds with a burst of confetti in their colour, then the next countdown starts.
+- At the end, the three winners are revealed one at a time (First, Second, Third), each with confetti. A bigger burst follows the last reveal.
+- Each round has its own seed, worked out from the battle seed, so the whole battle is still identical for everyone.
+
+## Following your own ship
+
+- Under the arena there is a tab for each player. Tap your name to follow your ship.
+- Your ship gets a pulsing ring and a "(you)" label, and the other ships and their bullets fade back.
+- Each tab shows that player's status: shields left, "Out #n" once knocked out, or "Won R1" once they've won a round.
+- If you're knocked out, the ticker says "That's you!". A win adds "(you!)" to your name.
+- Tap your name again to stop following. Your choice is saved in your browser only, so each viewer picks their own.
+
+## Full-screen side panel
+
+In full screen on a landscape screen, a panel on the right lists who is still flying, with their shields, and the round winners so far. The player you're following is highlighted. In portrait the panel is hidden to save space, and the player tabs show the same information.
+
+## Colours
+
+Ships use 14 distinct colours, based on each name's position in the list, so every player in a group of up to 14 has their own colour.
+
+## Watch-only page
 
 Anyone who opens the link gets a watch-only page. It has no tabs, no list, no speed control and no share box: just the arena and a play button.
 
@@ -21,7 +48,7 @@ If you change the list, a new battle is created automatically. Send the new link
 - Flying into an asteroid costs 1 shield and bounces the ship away.
 - Shooting a large asteroid splits it in two. Shooting a small one destroys it.
 - The fire rate rises steadily over time, so a battle can't stall. The on-screen counter says "firing faster" once 25 seconds have passed.
-- The last ship left wins. If the final two are knocked out in the same instant, the one knocked out last wins.
+- The last ship left wins the round. If the final two are knocked out in the same instant, the one knocked out last wins.
 - The knockout feed records who took out whom, in finishing order (#13 is out first, #2 is the runner-up).
 
 A battle with 13 pilots usually lasts well under two minutes at 1×. At the default 0.75× it takes a third longer.
@@ -75,7 +102,7 @@ All distances are in world units. The arena is 1000 × 625, and it wraps at the 
 - Each ship faces a random direction.
 - Ships can't be damaged for the first 1 s.
 - Four asteroids start near the centre, with a radius of 30 to 50.
-- A ship's colour comes from its position in the original list, cycling through six colours.
+- A ship's colour comes from its position in the original list (14 colours).
 
 ### Ships
 
@@ -132,7 +159,10 @@ Everything is in `index.html`, inside `tools.battle`:
 | Speed options | `SPEEDS`, `DEFAULT_SPEED` |
 | Share link base | `ART_URL`: the artifact URL, or the page's own address when `window.LUCKY_STANDALONE` is true |
 | Random numbers | `mulberry` |
-| Setup | `setup()` |
+| Setup | `setup()`, `rosterFor()`, `roundSeed()` |
+| Rounds and ending | `finish()`, `finale()`, `countdown()` |
+| Player tabs and side panel | `renderTabs()`, `renderSide()` |
+| Confetti | `confetti()`, `stopConfetti()` |
 | One simulation step | `step()` |
 | Drawing | `draw()` |
 | Frame loop | `loop()` |
