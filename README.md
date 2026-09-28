@@ -2,6 +2,8 @@
 
 A single-page set of random pickers, built for choosing between friends. The main feature is **Space battle**: every name gets a ship, and the last ship flying wins. You send one link, and everyone who opens it watches the same fight.
 
+The look is a minimal, dark studio-software style: flat grey panels, square corners, small IBM Plex type and a single orange accent.
+
 Everything is in one file, `index.html`. There's no build step, no server code and nothing to install.
 
 ## What's in it

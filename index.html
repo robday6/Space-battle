@@ -10,27 +10,17 @@
 <title>Lucky Dip</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 :root{
-  --bg:#EDEFF6; --surface:#FFFFFF; --surface-2:#F5F6FB; --ink:#15172A; --muted:#5B6078; --line:#D6D9E6;
-  --accent:#2D3BFF; --accent-ink:#FFFFFF; --sun:#FFC53D; --pink:#FF5C8A; --teal:#17A999;
-  --shadow:0 1px 0 rgba(21,23,42,.06), 0 8px 24px -12px rgba(21,23,42,.25);
-  --display:"Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
-  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --bg:#10121F; --surface:#1A1D30; --surface-2:#22263D; --ink:#EEF0FA; --muted:#A2A7C2; --line:#33384F;
-    --accent:#7C86FF; --accent-ink:#0E1020; --shadow:0 1px 0 rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.7);
-  }
-}
-:root[data-theme="dark"]{
   color-scheme:dark;
-  --bg:#10121F; --surface:#1A1D30; --surface-2:#22263D; --ink:#EEF0FA; --muted:#A2A7C2; --line:#33384F;
-  --accent:#7C86FF; --accent-ink:#0E1020; --shadow:0 1px 0 rgba(0,0,0,.3), 0 10px 28px -14px rgba(0,0,0,.7);
+  --bg:#1E1E1E; --surface:#2A2A2A; --surface-2:#333333; --field:#1A1A1A; --ink:#D6D6D6; --muted:#8C8C8C; --line:#141414; --hair:#3D3D3D;
+  --accent:#FF9A00; --accent-ink:#111111; --sun:#FF9A00; --pink:#FF5C8A; --teal:#3FB8AF;
+  --shadow:none;
+  --display:"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --body:"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --cond:"IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 *{box-sizing:border-box}
 body.guest #tabs, body.guest .tag{display:none}
@@ -191,6 +181,105 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
   .podium li{animation:none}
   .coin{transition:none} .die.rolling{animation:none} .result.pop{animation:none}
 }
+
+/* ---- minimal studio skin ---- */
+body{font-size:13px; line-height:1.45; padding-block:12px 32px; -webkit-font-smoothing:antialiased}
+.wrap{gap:10px; max-width:1180px}
+header{align-items:center; border-bottom:1px solid var(--hair); padding-bottom:10px}
+h1{font:600 15px/1 var(--body); letter-spacing:.01em}
+.tag{font-size:12px}
+.tabs{gap:0; padding:0; background:var(--surface); border:1px solid var(--line); border-radius:2px}
+.tab{font:500 12px/1 var(--body); padding:8px 12px; border-radius:0; color:var(--muted); border-right:1px solid var(--line)}
+.tab svg{width:13px; height:13px}
+.tab:hover{background:var(--surface-2); color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--accent); color:var(--accent-ink)}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible{outline:1px solid var(--accent); outline-offset:1px}
+.stage{gap:10px; grid-template-columns:minmax(0,240px) minmax(0,1fr)}
+@media (max-width:760px){ .stage{grid-template-columns:minmax(0,1fr)} }
+.panel{border-radius:2px; padding:12px; gap:10px; background:var(--surface); border-color:var(--line)}
+.tool{box-shadow:none; padding:14px; min-height:0}
+.eyebrow,.ptabs-label,label.f{font:500 10.5px/1 var(--cond); letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+h2{font:600 16px/1.2 var(--body)}
+.lede{font-size:12.5px; max-width:84ch}
+textarea{border-radius:2px; background:var(--field); border-color:var(--line); font:400 13px/1.6 var(--body); min-height:200px; padding:8px 10px}
+.count{font:400 11px var(--mono)}
+.btn{border-radius:2px; padding:7px 12px; font:500 12px/1 var(--body); transition:none; border:1px solid transparent}
+.btn:hover{filter:brightness(1.1)}
+.btn:active{transform:none; filter:brightness(1.2)}
+.btn.ghost{background:var(--surface-2); border-color:var(--line); color:var(--ink)}
+.btn.small{padding:5px 9px; font-size:11.5px}
+.btn.big{padding:9px 16px; font-size:13px}
+.btn.wa{background:var(--surface-2); color:#7FD99A; border-color:var(--line)}
+input[type=number], select{border-radius:2px; background:var(--field); border-color:var(--line); padding:6px 8px; font:400 13px var(--mono); width:80px}
+.check{font-weight:400; font-size:12.5px}
+.check input{width:14px; height:14px}
+.result{font:600 clamp(28px,5vw,44px)/1.1 var(--body); letter-spacing:-.01em}
+.chip{border-radius:2px; padding:3px 8px; font-size:12px; font-weight:500}
+.chip i.dot{border-radius:0; width:4px; height:12px; vertical-align:-1px}
+.note{font-size:12px}
+.pointer{border-top-color:var(--accent); filter:none}
+.hub{border-width:2px; font:600 11px var(--cond); letter-spacing:.08em}
+.slip{border-radius:2px; transform:none!important; box-shadow:none; font:600 clamp(24px,5vw,40px)/1.1 var(--body); background:var(--accent); color:#111}
+.slip.empty{border:1px dashed var(--hair); font-size:14px}
+.team,.order li,.stat{border-radius:2px}
+.team{background:var(--surface-2); border-color:var(--line)}
+.team h3{font:600 13px var(--body)}
+.team h3 i{border-radius:0; width:4px; height:14px}
+.order li{padding:7px 10px; font-weight:500; background:var(--surface-2); border-color:var(--line)}
+.order li::before{border-radius:2px; width:22px; height:22px; font:500 11px var(--mono); background:var(--field); color:var(--accent)}
+.die{border-radius:3px; border:1px solid var(--hair); box-shadow:none; background:var(--surface-2); width:64px; height:64px; font:500 24px var(--mono)}
+.pips{grid-template-columns:repeat(3,10px); grid-template-rows:repeat(3,10px); gap:5px}
+.pips i{width:10px; height:10px}
+.total{font:500 15px var(--mono)}
+.coin{width:140px; height:140px}
+.face{border-width:2px; box-shadow:none; font:600 16px var(--cond); letter-spacing:.1em}
+.face.h{background:var(--accent); color:#111}
+.stat{padding:8px 12px; background:var(--surface-2); border-color:var(--line)}
+.stat b{font:500 20px var(--mono)}
+.stat span{font:500 10.5px var(--cond)}
+.hist i{border-radius:1px; font-weight:500}
+.hist i.H{background:var(--accent); color:#111}
+/* battle */
+.arena{border-radius:2px; background:#111; border-color:var(--line)}
+.arena-wrap{gap:8px}
+.arena-wrap.theatre,.arena-wrap:fullscreen,.arena-wrap:-webkit-full-screen{background:#161616}
+.arena-wrap.theatre .arena,.arena-wrap:fullscreen .arena{border-color:#0C0C0C}
+.overlay{background:rgba(17,17,17,.64); gap:12px}
+.overlay .headline{font:600 clamp(24px,4.4vw,40px)/1.1 var(--body); letter-spacing:-.01em}
+.overlay .sub{font:500 11px var(--cond); letter-spacing:.1em; color:#9A9A9A}
+.count-big{font:500 clamp(56px,11vw,120px)/1 var(--mono); color:var(--accent)}
+.rules{gap:4px}
+.rules li{border-radius:2px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.06); font:400 12px/1.35 var(--body); padding:7px 10px}
+.rules b{font:500 12px var(--mono); color:var(--accent); min-width:28px}
+.podium{gap:4px}
+.podium li{border-radius:2px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.06)}
+.podium .nm{font:600 clamp(18px,3vw,26px)/1.1 var(--body)}
+.podium .rn,.podium .ko{font:500 10.5px var(--cond); letter-spacing:.08em}
+.hud{font:400 11px var(--mono); color:#8A8A8A}
+.ticker{font:500 12px var(--body)}
+.share{border-radius:2px; background:var(--bg); border-color:var(--line); padding:10px; gap:8px}
+.share input{border-radius:2px; background:var(--field); border-color:var(--line); padding:6px 8px; font-size:12px}
+.bgrid{gap:10px}
+.feed{font-size:12.5px; gap:2px}
+.feed li b{font:400 11px var(--mono)}
+.ptabs{gap:2px; padding:0 0 4px}
+.ptab{border-radius:1px; padding:0 10px 0 0; height:28px; gap:8px; background:var(--surface-2); border:1px solid var(--line); color:var(--ink); font:500 12px var(--body)}
+.ptab i{border-radius:0; width:4px; height:100%}
+.ptab .st{font:400 10.5px var(--mono); opacity:.65}
+.ptab[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#111}
+.arena-wrap.theatre .ptab,.arena-wrap:fullscreen .ptab{background:#2A2A2A; color:#D6D6D6; border-color:#0F0F0F}
+.arena-wrap.theatre .ptab[aria-pressed="true"],.arena-wrap:fullscreen .ptab[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#111}
+.arena-wrap.theatre .ptabs-label,.arena-wrap:fullscreen .ptabs-label{color:#8A8A8A}
+.arena-wrap.theatre .exitfs,.arena-wrap:fullscreen .exitfs{background:#2A2A2A; color:#D6D6D6; border-color:#0F0F0F}
+.fs-side{background:#1E1E1E; border-color:#0F0F0F; border-radius:2px; padding:10px; gap:8px}
+.fs-side h3{font:500 10.5px var(--cond); letter-spacing:.08em; color:#8A8A8A}
+.fs-side h3 b{font:400 11px var(--mono); color:#D6D6D6}
+.fs-list{gap:1px}
+.fs-list li{border-radius:1px; font:500 12.5px var(--body); padding:5px 6px; background:#262626}
+.fs-list li i{border-radius:0; width:4px; height:16px}
+.fs-list li em{font:400 10.5px var(--mono); color:#8A8A8A}
+.fs-list li.me{background:var(--accent); color:#111}
+.fs-list li.me em{color:#111}
 </style>
 <style>html{color-scheme:light}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -252,8 +341,8 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
   updateCount();
 
   const icon = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
-  const SEG = ['#2D3BFF', '#FFC53D', '#FF5C8A', '#17A999', '#FF8A3D', '#8B5CF6'];
-  const SEG_INK = ['#FFFFFF', '#1B1600', '#FFFFFF', '#FFFFFF', '#1B1000', '#FFFFFF'];
+  const SEG = ['#6A86E8', '#E6B43C', '#E0708A', '#4DB8AE', '#E8894A', '#A085E0'];
+  const SEG_INK = ['#111111', '#111111', '#111111', '#111111', '#111111', '#111111'];
 
   // ---------- tools ----------
   const tools = {};
@@ -291,7 +380,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
           ctx.save(); ctx.rotate(i * seg + seg / 2);
           ctx.fillStyle = names.length ? SEG_INK[ci] : '#fff'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
           const fs = Math.max(10, Math.min(22, r * 0.9 * seg * 0.55, r / 9));
-          ctx.font = `700 ${fs}px Figtree, system-ui, sans-serif`;
+          ctx.font = `700 ${fs}px "IBM Plex Sans", system-ui, sans-serif`;
           let t = label; const maxW = r * 0.68;
           while (ctx.measureText(t).width > maxW && t.length > 2) t = t.slice(0, -2) + '…';
           ctx.fillText(t, r - 18, 0); ctx.restore();
@@ -550,7 +639,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
       const stopConfetti = () => { confTimers.forEach(clearTimeout); confTimers = []; cancelAnimationFrame(confRaf); confRaf = 0; conf = []; cctx.clearRect(0, 0, cc.width, cc.height); };
       $('#ptabs').addEventListener('click', e => { const b = e.target.closest('.ptab'); if (!b) return; focus = focus === b.dataset.p ? '' : b.dataset.p; store.set('battleFocus', focus); renderSide(); if (!running) draw(); });
       const draw = () => {
-        ctx.fillStyle = '#070914'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, W, H);
         ctx.save(); if (shake > .3) ctx.translate((V() - .5) * shake, (V() - .5) * shake);
         for (const s of stars) { ctx.globalAlpha = s.a; ctx.fillStyle = '#fff'; ctx.fillRect(s.x, s.y, s.s, s.s); }
         ctx.globalAlpha = 1; ctx.lineWidth = 2; ctx.strokeStyle = '#8990AE';
@@ -563,7 +652,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
         for (const g of rings) { const k = 1 - g.life / g.full; ctx.globalAlpha = Math.max(0, g.life / g.full); ctx.strokeStyle = g.color; ctx.lineWidth = g.w * (1 - k * .6); ctx.beginPath(); ctx.arc(g.x, g.y, g.r + (g.max - g.r) * (1 - Math.pow(1 - k, 3)), 0, TAU); ctx.stroke(); }
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = 1;
-        ctx.font = `700 ${Math.max(15, 12 / scale)}px Figtree, system-ui, sans-serif`; ctx.textAlign = 'center';
+        ctx.font = `700 ${Math.max(15, 12 / scale)}px "IBM Plex Sans", system-ui, sans-serif`; ctx.textAlign = 'center';
         ctx.globalAlpha = 1;
         for (const s of ships) {
           if (!s.alive) continue;
@@ -579,7 +668,7 @@ input[type=number], select{background:var(--surface-2); color:var(--ink); border
           for (let k = 0; k < 3; k++) { ctx.fillStyle = k < s.hp ? s.color : '#333851'; ctx.fillRect(s.x - 13 + k * 9, s.y + 20, 7, 4); }
         }
         ctx.textAlign = 'center';
-        for (const f of floaters) { const k = f.life / f.full; ctx.globalAlpha = Math.min(1, k * 2); ctx.font = `800 ${Math.max(f.big ? 26 : 17, (f.big ? 20 : 13) / scale)}px "Bricolage Grotesque", system-ui, sans-serif`; ctx.fillStyle = f.color; ctx.fillText(f.txt, f.x, f.y - (1 - k) * 26); }
+        for (const f of floaters) { const k = f.life / f.full; ctx.globalAlpha = Math.min(1, k * 2); ctx.font = `600 ${Math.max(f.big ? 26 : 17, (f.big ? 20 : 13) / scale)}px "IBM Plex Sans", system-ui, sans-serif`; ctx.fillStyle = f.color; ctx.fillText(f.txt, f.x, f.y - (1 - k) * 26); }
         ctx.globalAlpha = 1; ctx.restore();
         if (flashA > .01) { ctx.fillStyle = `rgba(255,255,255,${flashA})`; ctx.fillRect(0, 0, W, H); }
         hud.textContent = `Battle #${battleId()}` + (running && !over ? ` · Round ${round + 1} of ${totalRounds()} · ${ships.filter(s => s.alive).length} left · ${Math.floor(t)}s${t > 25 ? ' · firing faster' : ''}` : '');
