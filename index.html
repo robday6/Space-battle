@@ -288,7 +288,7 @@ body.guest header{display:none}
 .arena-wrap.kwrap.solo-guest .fs-side,.arena-wrap.kwrap.solo-guest .ptabs,.arena-wrap.kwrap.solo-guest .ptabs-label,.arena-wrap.kwrap.solo-guest .exitfs,.arena-wrap.kwrap.solo-guest .turn-hint{display:none!important}
 .arena-wrap.kwrap.solo-guest .arena{width:min(calc(100vw - 24px), calc(100vh - 24px))!important; border:0}
 .solo-guest .overlay{background:rgba(0,0,0,.35)}
-.pond{aspect-ratio:1; background:#1E1E1E}
+.pond{aspect-ratio:1; background:#09060D}
 .pond canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
 .pond canvas.lofi{image-rendering:pixelated; image-rendering:crisp-edges}
 .kwrap .arena{width:min(100%, 640px); align-self:center}
@@ -897,7 +897,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         {label: 'Tancho', base: '#EFE8DA', spot: '#D9472B', head: true},
         {label: 'Chagoi', base: '#A9744A', spot: '#C9925F'},
       ];
-      let R, seed, names, pellets = [], koi = [], eaten = [], pads = [], stones = [], t = 0, over = false, running = false, paused = false, raf = 0, last = 0, acc = 0, timer = 0, ripples = [], winner = null;
+      let R, seed, names, pellets = [], koi = [], eaten = [], pads = [], stones = [], specks = [], t = 0, over = false, running = false, paused = false, raf = 0, last = 0, acc = 0, timer = 0, ripples = [], winner = null;
       let focus = store.get('koiFocus', ''), conf = [], confRaf = 0, confTimers = [];
       const pondId = () => seed.toString(36).toUpperCase();
       const speed = () => speedSel ? +speedSel.value : guest.speed;
@@ -921,7 +921,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
             spots: Array.from({length: 2 + Math.floor(R() * 3)}, () => ({s: .12 + R() * .6, off: (R() - .5) * .9, r: .28 + R() * .3, c: R() < .3 && type.spot2 ? 'spot2' : 'spot'})), spine: null, phase: R() * TAU};
         });
         const VR = mulberry(seed ^ 0x51ED); // scenery: same for everyone, never touches the simulation
-        pads = Array.from({length: 6}, () => { const a = VR() * TAU, r = POND * (.55 + VR() * .38); return {x: CX + Math.cos(a) * r, y: CY + Math.sin(a) * r, r: 26 + VR() * 26, rot: VR() * TAU, flower: VR() < .35}; });
+        pads = []; for (let i = 0; i < 40 && pads.length < 15; i++) { const pd = {x: 40 + VR() * (W - 80), y: 40 + VR() * (W - 80), r: 18 + VR() * 30, rot: VR() * TAU}; if (!pads.some(q => (q.x - pd.x) ** 2 + (q.y - pd.y) ** 2 < (q.r + pd.r + 6) ** 2)) pads.push(pd); }
+        specks = Array.from({length: 46}, () => ({x: VR() * W, y: VR() * W, r: VR() < .7 ? 4 : 7, vx: (VR() - .5) * 6, vy: (VR() - .5) * 6}));
         stones = Array.from({length: 70}, (_, i) => { const a = i / 70 * TAU + VR() * .05; return {a, r: 14 + VR() * 16, tone: VR()}; });
         eaten = []; t = 0; over = false; acc = 0; ripples = []; winner = null; ticker.textContent = '';
         renderSide(); draw();
@@ -983,53 +984,44 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         }
         c.beginPath(); c.moveTo(L[0][0], L[0][1]); for (const p of L) c.lineTo(p[0], p[1]); for (let i = Rr.length - 1; i >= 0; i--) c.lineTo(Rr[i][0], Rr[i][1]); c.closePath();
       };
+      const INK = '#CFE3EE', BG = '#09060D', PAD = '#2DB386';
       const drawKoi = (c, k, now) => {
         const s = spineOf(k), n = s.length - 1, tail = s[n], pre = s[n - 1];
         const wig = Math.sin(now / (k.target ? 90 : 160) + k.phase) * .5;
-        // wiggle the spine a touch for swimming
         for (let i = 2; i <= n; i++) { const a = s[i - 1], b = s[i], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1, w = Math.sin(now / (k.target ? 90 : 160) + k.phase - i * .6) * i * .35; b.x += -dy / d * w * .15; b.y += dx / d * w * .15; }
-        // shadow
-        bodyPath(c, k, s, 9, 12); c.fillStyle = 'rgba(0,0,0,.28)'; c.fill();
+        c.lineJoin = 'round'; c.fillStyle = k.type.base;
         // tail
-        const tx = tail.x - pre.x, ty = tail.y - pre.y, td = Math.sqrt(tx * tx + ty * ty) || 1, ux = tx / td, uy = ty / td, fl = k.len * .22;
+        const tx = tail.x - pre.x, ty = tail.y - pre.y, td = Math.sqrt(tx * tx + ty * ty) || 1, ux = tx / td, uy = ty / td, fl = k.len * .24;
         c.beginPath(); c.moveTo(pre.x, pre.y);
         c.lineTo(tail.x + ux * fl - uy * fl * (.6 + wig), tail.y + uy * fl + ux * fl * (.6 + wig));
-        c.lineTo(tail.x + ux * fl * .6, tail.y + uy * fl * .6);
+        c.lineTo(tail.x + ux * fl * .55, tail.y + uy * fl * .55);
         c.lineTo(tail.x + ux * fl + uy * fl * (.6 - wig), tail.y + uy * fl - ux * fl * (.6 - wig));
-        c.closePath(); c.fillStyle = k.type.base; c.globalAlpha = .8; c.fill(); c.globalAlpha = 1;
-        // pectoral fins
+        c.globalAlpha = .85; c.closePath(); c.fill(); c.globalAlpha = 1;
+        // side fins
         const h1 = s[2], h0 = s[1], fx = h1.x - h0.x, fy = h1.y - h0.y, fd = Math.sqrt(fx * fx + fy * fy) || 1, px = -fy / fd, py = fx / fd, fw = k.len * .2;
-        c.fillStyle = k.type.base; c.globalAlpha = .7;
-        for (const sg of [1, -1]) { c.beginPath(); c.moveTo(h1.x, h1.y); c.lineTo(h1.x + px * fw * sg + fx / fd * fw * .8, h1.y + py * fw * sg + fy / fd * fw * .8); c.lineTo(h1.x + px * fw * .5 * sg + fx / fd * fw * 1.2, h1.y + py * fw * .5 * sg + fy / fd * fw * 1.2); c.closePath(); c.fill(); }
-        c.globalAlpha = 1;
-        // body + spots
-        bodyPath(c, k, s); c.fillStyle = k.type.base; c.fill();
+        c.globalAlpha = .75; for (const sg of [1, -1]) { c.beginPath(); c.moveTo(h1.x, h1.y); c.lineTo(h1.x + px * fw * sg + fx / fd * fw * .8, h1.y + py * fw * sg + fy / fd * fw * .8); c.lineTo(h1.x + px * fw * .5 * sg + fx / fd * fw * 1.2, h1.y + py * fw * .5 * sg + fy / fd * fw * 1.2); c.closePath(); c.fill(); } c.globalAlpha = 1;
+        // body and markings
+        bodyPath(c, k, s); c.fill();
         c.save(); bodyPath(c, k, s); c.clip();
         for (const sp of k.spots) { const i = Math.round(sp.s * n), a = s[i], b = s[Math.min(n, i + 1)], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1; c.fillStyle = k.type[sp.c] || k.type.spot; c.beginPath(); c.arc(a.x - dy / d * sp.off * k.len * .12, a.y + dx / d * sp.off * k.len * .12, k.len * .13 * sp.r * 1.6, 0, TAU); c.fill(); }
-        if (k.type.head) { c.fillStyle = k.type.spot; c.beginPath(); c.arc(s[1].x, s[1].y, k.len * .07, 0, TAU); c.fill(); }
+        if (k.type.head) { c.fillStyle = k.type.spot; c.beginPath(); c.arc(s[1].x, s[1].y, k.len * .05, 0, TAU); c.fill(); }
         c.restore();
       };
       const draw = () => {
         const now = performance.now(), c = lctx;
-        c.fillStyle = '#000000'; c.fillRect(0, 0, W, W);
-        // stone rim
-        for (const st of stones) { const r = POND + 10; c.fillStyle = st.tone < .33 ? '#4A4A46' : st.tone < .66 ? '#5B5A54' : '#3C3C39'; c.beginPath(); c.arc(CX + Math.cos(st.a) * r, CY + Math.sin(st.a) * r, st.r, 0, TAU); c.fill(); }
-        // water
-        c.fillStyle = '#16403E'; c.beginPath(); c.arc(CX, CY, POND, 0, TAU); c.fill();
-        c.fillStyle = '#1B4A47'; c.beginPath(); c.arc(CX - 40, CY - 50, POND * .72, 0, TAU); c.fill();
-        c.save(); c.beginPath(); c.arc(CX, CY, POND, 0, TAU); c.clip();
-        // drifting light patches
-        c.fillStyle = 'rgba(120,200,190,.06)';
-        for (let i = 0; i < 7; i++) { const a = now / 9000 + i * 1.7; c.beginPath(); c.ellipse(CX + Math.cos(a) * 220 * Math.sin(i), CY + Math.sin(a * .8) * 200, 90, 40, a, 0, TAU); c.fill(); }
+        c.fillStyle = BG; c.fillRect(0, 0, W, W);
+        // drifting specks
+        c.fillStyle = '#7FCFAE';
+        for (const sp of specks) { const x = (sp.x + now / 1000 * sp.vx + W) % W, y = (sp.y + now / 1000 * sp.vy + W) % W; c.fillRect(x, y, sp.r, sp.r); }
         for (const k of koi) drawKoi(c, k, now);
-        // pellets
-        for (const p of pellets) if (p.alive) { const bob = Math.sin(now / 500 + p.bob) * 1.5; c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.arc(p.x + 4, p.y + 5, 7, 0, TAU); c.fill(); c.fillStyle = p === winner ? '#F2C86A' : '#C9A46C'; c.beginPath(); c.arc(p.x, p.y + bob, 7, 0, TAU); c.fill(); c.fillStyle = '#E5CB98'; c.beginPath(); c.arc(p.x - 2, p.y + bob - 2, 3, 0, TAU); c.fill(); }
+        // food pellets
+        for (const p of pellets) if (p.alive) { const bob = Math.sin(now / 500 + p.bob) * 1.5; c.fillStyle = p === winner ? '#F2D36A' : '#BFF0D2'; c.fillRect(p.x - 6, p.y - 6 + bob, 12, 12); }
         // ripples
-        c.lineWidth = 4;
-        for (const g of ripples) { const k = 1 - g.life / g.full; c.strokeStyle = `rgba(220,240,235,${(g.life / g.full) * .7})`; c.beginPath(); c.arc(g.x, g.y, g.r + k * 60, 0, TAU); c.stroke(); }
-        c.restore();
-        // lily pads above the fish
-        for (const pd of pads) { c.fillStyle = '#3F6A3A'; c.beginPath(); c.moveTo(pd.x, pd.y); c.arc(pd.x, pd.y, pd.r, pd.rot + .35, pd.rot + TAU - .05); c.closePath(); c.fill(); c.fillStyle = '#4E7E45'; c.beginPath(); c.arc(pd.x - pd.r * .2, pd.y - pd.r * .2, pd.r * .45, 0, TAU); c.fill(); if (pd.flower) { c.fillStyle = '#E79AAE'; c.beginPath(); c.arc(pd.x + pd.r * .25, pd.y + pd.r * .1, pd.r * .28, 0, TAU); c.fill(); c.fillStyle = '#F4D06A'; c.beginPath(); c.arc(pd.x + pd.r * .25, pd.y + pd.r * .1, pd.r * .1, 0, TAU); c.fill(); } }
+        c.lineWidth = 3.5;
+        for (const g of ripples) { const k = 1 - g.life / g.full; c.strokeStyle = `rgba(207,227,238,${(g.life / g.full) * .8})`; c.beginPath(); c.arc(g.x, g.y, g.r + k * 60, 0, TAU); c.stroke(); }
+        // flat lily pads on the surface
+        c.fillStyle = PAD;
+        for (const pd of pads) { c.beginPath(); c.moveTo(pd.x, pd.y); c.arc(pd.x, pd.y, pd.r, pd.rot + .5, pd.rot + TAU - .1); c.closePath(); c.fill(); }
         // crisp layer: labels and focus ring
         const h = hctx; h.clearRect(0, 0, W, W);
         const sc = hi.clientWidth / W || 1, fs = Math.max(11, 11 / sc);
@@ -1038,8 +1030,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           const me = p.name === focus;
           if (me || p === winner) { const pr = 18 + Math.sin(now / 200) * 3; h.strokeStyle = p === winner ? '#F2C86A' : '#FF9A00'; h.lineWidth = 2.5 / sc > 2.5 ? 2.5 / sc : 2.5; h.beginPath(); h.arc(p.x, p.y, pr, 0, TAU); h.stroke(); }
           const label = me ? `${p.name} (you)` : p.name;
-          h.lineWidth = 3 / sc; h.strokeStyle = 'rgba(10,20,20,.85)'; h.strokeText(label, p.x, p.y - 14);
-          h.fillStyle = me ? '#FF9A00' : p === winner ? '#F2C86A' : '#E8E4DA'; h.fillText(label, p.x, p.y - 14);
+          h.lineWidth = 3 / sc; h.strokeStyle = 'rgba(9,6,13,.9)'; h.strokeText(label, p.x, p.y - 14);
+          h.fillStyle = me ? '#FF9A00' : p === winner ? '#F2D36A' : '#CFE3EE'; h.fillText(label, p.x, p.y - 14);
         }
         hud.textContent = guest && !running ? '' : `pond #${pondId().toLowerCase()}` + (running && !over ? ` ${bar(pellets.length - pellets.filter(p => p.alive).length, pellets.length - 1)} ${pellets.filter(p => p.alive).length} left · ${Math.floor(t)}s` : '');
       };
@@ -1140,9 +1132,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         const i = Math.floor(intro.t / PER);
         if (i >= intro.fish.length) { endIntro(); return; }
         const tt = intro.t - i * PER, u = tt / PER, fi = intro.fish[i], c = lctx;
-        c.fillStyle = '#000000'; c.fillRect(0, 0, W, W);
+        c.fillStyle = '#09060D'; c.fillRect(0, 0, W, W);
         // pixel floor grid, retro select-screen style
-        c.strokeStyle = '#0E2E0E'; c.lineWidth = 4;
+        c.strokeStyle = '#123A2C'; c.lineWidth = 4;
         for (let g = 0; g <= 8; g++) { const y = 520 + g * g * 4.5; c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
         for (let g = -8; g <= 8; g++) { c.beginPath(); c.moveTo(CX + g * 40, 520); c.lineTo(CX + g * 160, W); c.stroke(); }
         const pop = Math.min(1, tt / .18), out = Math.max(0, (u - .9) / .1), scl = .92 * (pop < 1 ? Math.round(pop * 4) / 4 : 1) * (1 - out);
