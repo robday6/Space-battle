@@ -401,6 +401,26 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   .battle-arena .rules{display:none}
 }
 @media (prefers-reduced-motion: reduce){ h1::after{animation:none} }
+
+/* koi pond: tall screen, UI below */
+.pond{aspect-ratio:9/16}
+.kwrap .arena{width:min(100%, 380px)}
+.kbar,.krules,.kwrap .ptabs{width:min(100%, 380px); align-self:center}
+.kbar{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; min-height:30px; font:400 11px/1.4 var(--mono); color:var(--muted); opacity:.75}
+.kbar .hud,.kbar .ticker{position:static; display:block; background:none!important; padding:0; font:400 11px/1.4 var(--mono); color:var(--muted); text-shadow:none; white-space:pre-wrap}
+.kact{display:flex; gap:10px; flex:0 0 auto}
+.kact .btn,.kbar .kskip{position:static; background:transparent!important; color:var(--muted)!important; font:400 11px/1.4 var(--mono); padding:0}
+.kact .btn::before,.kact .btn::after,.kbar .kskip::before,.kbar .kskip::after{color:inherit!important}
+.kact .btn:hover,.kbar .kskip:hover{color:var(--ink)!important}
+.kact .btn.play{color:var(--ink)!important; font-size:13px}
+.krules{list-style:none; margin:0; padding:0; font:400 11px/1.5 var(--mono); color:var(--muted); opacity:.65}
+.krules li::before{content:"> "}
+.kwrap .overlay{background:none; pointer-events:none}
+.kwrap .overlay .headline{color:#F2D36A; text-shadow:0 0 8px #000}
+.arena-wrap.kwrap.theatre,.arena-wrap.kwrap:fullscreen{display:flex!important; flex-direction:column; align-items:center; justify-content:flex-start; gap:6px; padding:8px}
+.arena-wrap.kwrap.theatre .arena,.arena-wrap.kwrap:fullscreen .arena{width:min(calc(100vw - 16px), calc((100vh - 90px) * 9 / 16))!important; border:0}
+.arena-wrap.kwrap.theatre .kbar,.arena-wrap.kwrap:fullscreen .kbar,.arena-wrap.kwrap.theatre .krules,.arena-wrap.kwrap:fullscreen .krules,.arena-wrap.kwrap.theatre .ptabs,.arena-wrap.kwrap:fullscreen .ptabs{width:min(calc(100vw - 16px), calc((100vh - 90px) * 9 / 16))!important}
+.arena-wrap.kwrap .fs-side{display:none!important}
 </style>
 <style>html{color-scheme:light}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -865,7 +885,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           ${guest ? '' : '<label class="f" for="kspeed" style="flex-direction:row; align-items:center; gap:8px">Speed<select id="kspeed" style="width:auto">' + SPEEDS.map(v => `<option value="${v}">${v}×</option>`).join('') + '</select></label>'}
         </div>
         <div class="arena-wrap kwrap" id="kwrap">
-          <div class="arena pond" id="kpond"><canvas id="klo" class="lofi" aria-label="Koi pond"></canvas><canvas id="khi" aria-hidden="true"></canvas><div class="hud" id="khud"></div><div class="ticker" id="kticker" aria-live="polite"></div><div class="overlay" id="ko"></div><canvas class="confetti" id="kconf" aria-hidden="true"></canvas><button class="btn small kskip" id="kskip" type="button" hidden>skip intro</button></div>
+          <div class="arena pond" id="kpond"><canvas id="klo" class="lofi" aria-label="Koi pond"></canvas><canvas id="khi" aria-hidden="true"></canvas><div class="overlay" id="ko"></div><canvas class="confetti" id="kconf" aria-hidden="true"></canvas></div>
+          <div class="kbar"><div class="kstat"><div class="hud" id="khud"></div><div class="ticker" id="kticker" aria-live="polite"></div></div><div class="kact"><span id="kact" class="kact"></span><button class="btn small kskip" id="kskip" type="button" hidden>skip intro</button></div></div>
+          <ul class="krules" id="krules"></ul>
           <aside class="fs-side" aria-label="Still floating"><h3>Still floating <b id="kfscount"></b></h3><ol class="fs-list" id="kfsalive"></ol></aside>
           <div class="ptabs" id="kptabs" aria-label="Follow a name"></div>
           <button class="btn ghost small exitfs" id="kexit" type="button">Exit full screen</button>
@@ -882,7 +904,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       const $ = s => el.querySelector(s);
       const lo = $('#klo'), lctx = lo.getContext('2d'), hi = $('#khi'), hctx = hi.getContext('2d'), overlay = $('#ko'), hud = $('#khud'), ticker = $('#kticker'), wrapEl = $('#kwrap'), speedSel = $('#kspeed');
       // world: a round pond in an 800 x 800 square, rendered at 240 px and scaled up
-      const W = 800, CX = 400, CY = 400, POND = 372, LO = 240, K = LO / W, DT = 1 / 120, TAU = Math.PI * 2, U = 1024;
+      const W = 720, H = 1280, CX = 360, CY = 640, LO = 180, LOH = 320, K = LO / W, DT = 1 / 120, TAU = Math.PI * 2, U = 1024;
       const COS = new Float64Array(U), SIN = new Float64Array(U);
       for (let i = 0; i < U; i++) { COS[i] = Math.round(Math.cos(i / U * TAU) * 1e9) / 1e9; SIN[i] = Math.round(Math.sin(i / U * TAU) * 1e9) / 1e9; }
       const ix = a => ((Math.floor(a) % U) + U) % U;
@@ -902,27 +924,28 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       const pondId = () => seed.toString(36).toUpperCase();
       const speed = () => speedSel ? +speedSel.value : guest.speed;
       const link = () => `${ART_URL}#koi.${seed.toString(36)}.${encNames(names)}.${speedCode(speed())}`;
-      const inPond = (x, y, m) => { const dx = x - CX, dy = y - CY; return dx * dx + dy * dy < (POND - m) * (POND - m); };
+      const inPond = (x, y, m) => x > m && x < W - m && y > m && y < H - m;
       const setup = () => {
         R = mulberry(seed);
         const n = names.length;
         pellets = [];
         for (let i = 0; i < n; i++) {
           let x = CX, y = CY, tries = 0;
-          do { x = CX + (R() * 2 - 1) * (POND - 70); y = CY + (R() * 2 - 1) * (POND - 70); tries++; }
+          do { x = 70 + R() * (W - 140); y = 90 + R() * (H - 180); tries++; }
           while ((!inPond(x, y, 70) || pellets.some(p => (p.x - x) ** 2 + (p.y - y) ** 2 < 62 * 62)) && tries < 60);
           pellets.push({name: names[i], x, y, vx: (R() - .5) * 10, vy: (R() - .5) * 10, alive: true, bob: R() * TAU});
         }
         const nk = n <= 6 ? 3 : n <= 12 ? 4 : 5;
+        const deck = TYPES.slice(); for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
         koi = Array.from({length: nk}, (_, k) => {
-          const a = Math.floor(R() * U), r0 = POND * (.35 + R() * .4);
-          const type = TYPES[(k + Math.floor(R() * TYPES.length)) % TYPES.length];
-          return {x: CX + COS[a] * r0, y: CY + SIN[a] * r0, a: R() * U, turn: 0, turnT: 0, target: null, cd: 2.5 + R() * 3, sp: 50, type, len: 64 + R() * 22, eats: 0,
+          const sx = 120 + R() * (W - 240), sy = 160 + R() * (H - 320);
+          const type = deck[k % deck.length];
+          return {x: sx, y: sy, a: R() * U, turn: 0, turnT: 0, target: null, cd: 2.5 + R() * 3, sp: 50, type, len: 64 + R() * 22, eats: 0,
             spots: Array.from({length: 2 + Math.floor(R() * 3)}, () => ({s: .12 + R() * .6, off: (R() - .5) * .9, r: .28 + R() * .3, c: R() < .3 && type.spot2 ? 'spot2' : 'spot'})), spine: null, phase: R() * TAU};
         });
         const VR = mulberry(seed ^ 0x51ED); // scenery: same for everyone, never touches the simulation
-        pads = []; for (let i = 0; i < 40 && pads.length < 15; i++) { const pd = {x: 40 + VR() * (W - 80), y: 40 + VR() * (W - 80), r: 18 + VR() * 30, rot: VR() * TAU}; if (!pads.some(q => (q.x - pd.x) ** 2 + (q.y - pd.y) ** 2 < (q.r + pd.r + 6) ** 2)) pads.push(pd); }
-        specks = Array.from({length: 46}, () => ({x: VR() * W, y: VR() * W, r: VR() < .7 ? 4 : 7, vx: (VR() - .5) * 6, vy: (VR() - .5) * 6}));
+        pads = []; for (let i = 0; i < 60 && pads.length < 18; i++) { const pd = {x: 40 + VR() * (W - 80), y: 40 + VR() * (H - 80), r: 18 + VR() * 30, rot: VR() * TAU}; if (!pads.some(q => (q.x - pd.x) ** 2 + (q.y - pd.y) ** 2 < (q.r + pd.r + 6) ** 2)) pads.push(pd); }
+        specks = Array.from({length: 60}, () => ({x: VR() * W, y: VR() * H, r: VR() < .7 ? 4 : 7, vx: (VR() - .5) * 6, vy: (VR() - .5) * 6}));
         stones = Array.from({length: 70}, (_, i) => { const a = i / 70 * TAU + VR() * .05; return {a, r: 14 + VR() * 16, tone: VR()}; });
         eaten = []; t = 0; over = false; acc = 0; ripples = []; winner = null; ticker.textContent = '';
         renderSide(); draw();
@@ -967,7 +990,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         }
       };
       // ---- drawing: low-res pond, crisp labels on top
-      const size = () => { const w = hi.clientWidth, d = devicePixelRatio || 1; if (!w) return; lo.width = LO; lo.height = LO; hi.width = w * d; hi.height = w * d; hctx.setTransform(d * w / W, 0, 0, d * w / W, 0, 0); lctx.setTransform(K, 0, 0, K, 0, 0); };
+      const size = () => { const w = hi.clientWidth, d = devicePixelRatio || 1; if (!w) return; lo.width = LO; lo.height = LOH; hi.width = w * d; hi.height = w * H / W * d; hctx.setTransform(d * w / W, 0, 0, d * w / W, 0, 0); lctx.setTransform(K, 0, 0, K, 0, 0); };
       const spineOf = k => {
         const n = 10, seg = k.len / n;
         if (!k.spine) { const kk = ix(k.a); k.spine = Array.from({length: n + 1}, (_, i) => ({x: k.x - COS[kk] * seg * i, y: k.y - SIN[kk] * seg * i})); }
@@ -1009,10 +1032,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       };
       const draw = () => {
         const now = performance.now(), c = lctx;
-        c.fillStyle = BG; c.fillRect(0, 0, W, W);
+        c.fillStyle = BG; c.fillRect(0, 0, W, H);
         // drifting specks
         c.fillStyle = '#7FCFAE';
-        for (const sp of specks) { const x = (sp.x + now / 1000 * sp.vx + W) % W, y = (sp.y + now / 1000 * sp.vy + W) % W; c.fillRect(x, y, sp.r, sp.r); }
+        for (const sp of specks) { const x = (sp.x + now / 1000 * sp.vx + W) % W, y = (sp.y + now / 1000 * sp.vy + H) % H; c.fillRect(x, y, sp.r, sp.r); }
         for (const k of koi) drawKoi(c, k, now);
         // food pellets
         for (const p of pellets) if (p.alive) { const bob = Math.sin(now / 500 + p.bob) * 1.5; c.fillStyle = p === winner ? '#F2D36A' : '#BFF0D2'; c.fillRect(p.x - 6, p.y - 6 + bob, 12, 12); }
@@ -1023,15 +1046,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         c.fillStyle = PAD;
         for (const pd of pads) { c.beginPath(); c.moveTo(pd.x, pd.y); c.arc(pd.x, pd.y, pd.r, pd.rot + .5, pd.rot + TAU - .1); c.closePath(); c.fill(); }
         // crisp layer: labels and focus ring
-        const h = hctx; h.clearRect(0, 0, W, W);
-        const sc = hi.clientWidth / W || 1, fs = Math.max(11, 11 / sc);
-        h.font = `500 ${fs}px "IBM Plex Mono", ui-monospace, monospace`; h.textAlign = 'center'; h.textBaseline = 'bottom';
+        const h = hctx; h.clearRect(0, 0, W, H);
+        const sc = hi.clientWidth / W || 1, fs = Math.max(10, 10 / sc);
+        h.font = `400 ${fs}px "IBM Plex Mono", ui-monospace, monospace`; h.textAlign = 'left'; h.textBaseline = 'middle';
         for (const p of pellets) if (p.alive) {
           const me = p.name === focus;
           if (me || p === winner) { const pr = 18 + Math.sin(now / 200) * 3; h.strokeStyle = p === winner ? '#F2C86A' : '#FF9A00'; h.lineWidth = 2.5 / sc > 2.5 ? 2.5 / sc : 2.5; h.beginPath(); h.arc(p.x, p.y, pr, 0, TAU); h.stroke(); }
           const label = me ? `${p.name} (you)` : p.name;
-          h.lineWidth = 3 / sc; h.strokeStyle = 'rgba(9,6,13,.9)'; h.strokeText(label, p.x, p.y - 14);
-          h.fillStyle = me ? '#FF9A00' : p === winner ? '#F2D36A' : '#CFE3EE'; h.fillText(label, p.x, p.y - 14);
+          h.globalAlpha = me || p === winner ? 1 : .55; h.fillStyle = me ? '#FF9A00' : p === winner ? '#F2D36A' : '#B9CCD4'; h.fillText(label, p.x + 12, p.y); h.globalAlpha = 1;
         }
         hud.textContent = guest && !running ? '' : `pond #${pondId().toLowerCase()}` + (running && !over ? ` ${bar(pellets.length - pellets.filter(p => p.alive).length, pellets.length - 1)} ${pellets.filter(p => p.alive).length} left · ${Math.floor(t)}s` : '');
       };
@@ -1046,18 +1068,22 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           return `<button class="ptab${e ? ' out' : ''}" type="button" data-p="${esc(n)}" aria-pressed="${focus === n}"><i style="background:${e ? '#555' : '#C9A46C'}"></i>${esc(n)}<span class="st">${e ? `Eaten #${e.place}` : p === winner ? 'Chosen' : 'Floating'}</span></button>`; }).join('');
         tabs.scrollLeft = keep;
       };
-      const RULES = () => `<ul class="rules"><li><b>●</b>Every name floats as a pellet of fish food</li><li><b>${koi.length}</b>${koi.length} koi eat them one at a time</li><li><b>1</b>The last name left floating is the chosen one</li><li><b>@</b>Tap your name below to follow it</li></ul>`;
-      const idle = (sub, big) => { overlay.hidden = false; if (guest) { overlay.innerHTML = '<button class="btn big" data-go="full" type="button">▶ Play</button>'; return; } overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span>${RULES()}<div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`; };
+      const RULES = () => `<li>every name floats as fish food</li><li>${koi.length} koi eat them one at a time</li><li>the last name left floating is the chosen one</li>`;
+      const act = html => { $('#kact').innerHTML = html; };
+      const idle = (sub, big) => { overlay.hidden = true; $('#krules').innerHTML = guest ? '' : RULES(); act(guest ? '<button class="btn play" data-go="full" type="button">▶ play</button>' : '<button class="btn play" data-go="full" type="button">▶ full screen</button><button class="btn" data-go="here" type="button">play here</button>'); return; overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span>${RULES()}<div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`; };
       const countdown = () => {
         let n = 3; paused = true; clearTimeout(timer);
-        const tick = () => { overlay.hidden = false; overlay.innerHTML = `<span class="sub">Feeding time</span><span class="count-big">${n || 'Go!'}</span>${RULES()}`; if (n > 0) { n--; timer = setTimeout(tick, 1200); } else timer = setTimeout(() => { overlay.hidden = true; paused = false; }, 550); };
+        act(''); $('#krules').innerHTML = RULES();
+        const tick = () => { overlay.hidden = false; overlay.innerHTML = `<span class="count-big">${n || 'Go!'}</span>`; if (n > 0) { n--; timer = setTimeout(tick, 1200); } else timer = setTimeout(() => { overlay.hidden = true; paused = false; $('#krules').innerHTML = ''; }, 550); };
         tick();
       };
       const finish = p => {
         over = true; winner = p; renderSide(); ticker.textContent = '';
         timer = setTimeout(() => {
           overlay.hidden = false;
-          overlay.innerHTML = `<span class="sub">Pond #${pondId()} · the chosen one</span><span class="headline" style="color:#F2C86A">${esc(p.name)}${p.name === focus ? ' (you!)' : ''}</span><span class="sub">Last one floating after ${Math.round(t)} seconds</span><div class="row" style="justify-content:center"><button class="btn ghost" data-go="here" type="button">Watch it again</button></div>`;
+          overlay.innerHTML = `<span class="headline">${esc(p.name)}${p.name === focus ? ' (you!)' : ''}</span>`;
+          ticker.textContent = `the chosen one: ${p.name} · last one floating after ${Math.round(t)}s`;
+          act('<button class="btn" data-go="here" type="button">watch again</button>');
           confetti(['#F2C86A', '#EFE8DA', '#D9472B', '#E79AAE'], 220);
         }, 1400);
         confTimers.push(setTimeout(() => { if (over) running = false; }, 9000));
@@ -1106,9 +1132,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       const startIntro = () => {
         const VR = mulberry(seed ^ 0xF15A), tr = TRAITS.slice(); for (let i = tr.length - 1; i > 0; i--) { const j = Math.floor(VR() * (i + 1)); [tr[i], tr[j]] = [tr[j], tr[i]]; }
         intro = {t: 0, fish: koi.map((k, i) => ({k, model: buildModel(k), trait: tr[i % tr.length]}))};
-        paused = true; overlay.hidden = true; $('#kskip').hidden = false;
+        paused = true; overlay.hidden = true; act(''); $('#krules').innerHTML = ''; $('#kskip').hidden = false;
       };
-      const endIntro = () => { intro = null; $('#kskip').hidden = true; hctx.clearRect(0, 0, W, W); draw(); countdown(); };
+      const endIntro = () => { intro = null; $('#kskip').hidden = true; hctx.clearRect(0, 0, W, H); draw(); countdown(); };
       const renderModel = (m, yaw, pitch, scale, bob) => {
         const o = octx; o.clearRect(0, 0, PX, PX);
         const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
@@ -1132,24 +1158,24 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         const i = Math.floor(intro.t / PER);
         if (i >= intro.fish.length) { endIntro(); return; }
         const tt = intro.t - i * PER, u = tt / PER, fi = intro.fish[i], c = lctx;
-        c.fillStyle = '#09060D'; c.fillRect(0, 0, W, W);
+        c.fillStyle = '#09060D'; c.fillRect(0, 0, W, H);
         // pixel floor grid, retro select-screen style
         c.strokeStyle = '#123A2C'; c.lineWidth = 4;
-        for (let g = 0; g <= 8; g++) { const y = 520 + g * g * 4.5; c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
-        for (let g = -8; g <= 8; g++) { c.beginPath(); c.moveTo(CX + g * 40, 520); c.lineTo(CX + g * 160, W); c.stroke(); }
+        for (let g = 0; g <= 10; g++) { const y = CY + 120 + g * g * 5; c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+        for (let g = -8; g <= 8; g++) { c.beginPath(); c.moveTo(CX + g * 40, CY + 120); c.lineTo(CX + g * 200, H); c.stroke(); }
         const pop = Math.min(1, tt / .18), out = Math.max(0, (u - .9) / .1), scl = .92 * (pop < 1 ? Math.round(pop * 4) / 4 : 1) * (1 - out);
         if (scl > 0) {
           renderModel(fi.model, tt * TAU / 2.2 + .6, -.42, scl, Math.round(Math.sin(tt * 4) * 1.5));
           c.imageSmoothingEnabled = false; c.drawImage(off, CX - 330, CY - 330, 660, 660); c.imageSmoothingEnabled = true;
         }
         // name card, typed out like a terminal
-        const h = hctx; h.clearRect(0, 0, W, W); h.textBaseline = 'alphabetic';
+        const h = hctx; h.clearRect(0, 0, W, H); h.textBaseline = 'alphabetic';
         const title = `the ${fi.k.type.label.toLowerCase()}`, n = Math.max(0, Math.floor((u - .15) * 80)), typed = fi.trait.slice(0, n);
         h.globalAlpha = Math.min(1, u * 8, (1 - u) * 8); h.textAlign = 'center';
-        h.font = '400 20px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#2FA52F'; h.fillText(`fish ${i + 1}/${intro.fish.length}`, CX, 130);
-        h.font = '500 50px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#4FE34F'; h.fillText(title, CX, 190);
+        h.font = '400 20px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#2FA52F'; h.fillText(`fish ${i + 1}/${intro.fish.length}`, CX, CY - 300);
+        h.font = '500 50px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#4FE34F'; h.fillText(title, CX, CY - 240);
         h.font = '400 24px "IBM Plex Mono", ui-monospace, monospace';
-        h.fillText('> ' + typed + (Math.floor(now / 530) % 2 ? '█' : ' '), CX, 690);
+        h.fillText('> ' + typed + (Math.floor(now / 530) % 2 ? '█' : ' '), CX, CY + 330);
         h.globalAlpha = 1; hud.textContent = '';
       };
       const loop = now => {
@@ -1179,12 +1205,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       $('#kskip').onclick = () => { if (intro) endIntro(); };
       $('#kstart').onclick = () => { if (!isFull()) enterFull(); play(); };
       $('#khere').onclick = () => play();
-      overlay.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (!b) return; if (b.dataset.go === 'full' && (guest ? !(document.fullscreenElement || document.webkitFullscreenElement) : !isFull())) enterFull(); play(); });
+      wrapEl.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (!b) return; if (b.dataset.go === 'full' && (guest ? !(document.fullscreenElement || document.webkitFullscreenElement) : !isFull())) enterFull(); play(); });
       $('#kptabs').addEventListener('click', e => { const b = e.target.closest('.ptab'); if (!b) return; focus = focus === b.dataset.p ? '' : b.dataset.p; store.set('koiFocus', focus); renderSide(); });
       const refreshShare = () => { if (guest) return; const L = link(); $('#klink').value = L; $('#kwa').href = 'https://wa.me/?text=' + encodeURIComponent(`Koi pond: ${names.length} names as fish food. Last one floating is the chosen one.\n${L}`); $('#kcmsg').textContent = ''; };
       const newPond = () => {
         running = false; paused = false; cancelAnimationFrame(raf); clearTimeout(timer); stopConfetti();
-        intro = null; $('#kskip').hidden = true; hctx.clearRect(0, 0, W, W);
+        intro = null; $('#kskip').hidden = true; hctx.clearRect(0, 0, W, H);
         names = items(); seed = rand(0x7fffffff) + 1; store.set('koiSeed', seed);
         if (names.length < 2) { overlay.hidden = false; overlay.innerHTML = '<span class="sub">Not enough names</span><span class="headline">Add at least two names</span>'; pellets = []; koi = []; draw(); return; }
         setup(); idle(`Pond #${pondId()} · ${names.length} names`, 'Feeding time'); refreshShare(); raf = requestAnimationFrame(idleLoop);

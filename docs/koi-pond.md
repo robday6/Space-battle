@@ -2,7 +2,7 @@
 
 Every name floats on a round pond as a pellet of fish food. Koi swim around and eat the pellets one at a time. The last name left floating is the chosen one.
 
-It looks like a game on a tiny LCD screen: a near-black background, flat mint-green lily pads with a notch cut out, drifting specks, small square food pellets and coloured koi. The pond is drawn at 240 × 240 pixels and scaled up with hard pixel edges, while the name labels stay sharp on top. It is square, so it fills a phone screen in portrait or landscape.
+It looks like a game on a tiny LCD screen: a near-black background, flat mint-green lily pads with a notch cut out, drifting specks, small square food pellets and coloured koi. The pond is drawn at low resolution and scaled up with hard pixel edges, while the name labels stay sharp on top. It is a tall 9:16 rectangle (720 × 1280 world units, drawn at 180 × 320 pixels), sized for a phone held upright and pinned to the top of the screen. Names sit faintly to the right of their pellets. All controls and text (status line, last event, play and skip buttons, rules) sit in a quiet strip under the pond rather than on top of it.
 
 ## How to run one
 
