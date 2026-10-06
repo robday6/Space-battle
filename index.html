@@ -282,6 +282,11 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
 .fs-list li.me em{color:#111}
 
 /* koi pond */
+body.guest header{display:none}
+.arena-wrap.kwrap.solo-guest{display:flex!important; flex-direction:column; align-items:center; justify-content:center; padding:12px}
+.arena-wrap.kwrap.solo-guest .fs-side,.arena-wrap.kwrap.solo-guest .ptabs,.arena-wrap.kwrap.solo-guest .ptabs-label,.arena-wrap.kwrap.solo-guest .exitfs,.arena-wrap.kwrap.solo-guest .turn-hint{display:none!important}
+.arena-wrap.kwrap.solo-guest .arena{width:min(calc(100vw - 24px), calc(100vh - 24px))!important; border:0}
+.solo-guest .overlay{background:rgba(0,0,0,.35)}
 .pond{aspect-ratio:1; background:#1E1E1E}
 .pond canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
 .pond canvas.lofi{image-rendering:pixelated; image-rendering:crisp-edges}
@@ -1035,7 +1040,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           h.lineWidth = 3 / sc; h.strokeStyle = 'rgba(10,20,20,.85)'; h.strokeText(label, p.x, p.y - 14);
           h.fillStyle = me ? '#FF9A00' : p === winner ? '#F2C86A' : '#E8E4DA'; h.fillText(label, p.x, p.y - 14);
         }
-        hud.textContent = `pond #${pondId().toLowerCase()}` + (running && !over ? ` ${bar(pellets.length - pellets.filter(p => p.alive).length, pellets.length - 1)} ${pellets.filter(p => p.alive).length} left · ${Math.floor(t)}s` : '');
+        hud.textContent = guest && !running ? '' : `pond #${pondId().toLowerCase()}` + (running && !over ? ` ${bar(pellets.length - pellets.filter(p => p.alive).length, pellets.length - 1)} ${pellets.filter(p => p.alive).length} left · ${Math.floor(t)}s` : '');
       };
       const renderSide = () => {
         const alive = pellets.filter(p => p.alive);
@@ -1049,7 +1054,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         tabs.scrollLeft = keep;
       };
       const RULES = () => `<ul class="rules"><li><b>●</b>Every name floats as a pellet of fish food</li><li><b>${koi.length}</b>${koi.length} koi eat them one at a time</li><li><b>1</b>The last name left floating is the chosen one</li><li><b>@</b>Tap your name below to follow it</li></ul>`;
-      const idle = (sub, big) => { overlay.hidden = false; overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span>${RULES()}<div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`; };
+      const idle = (sub, big) => { overlay.hidden = false; if (guest) { overlay.innerHTML = '<button class="btn big" data-go="full" type="button">▶ Play</button>'; return; } overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span>${RULES()}<div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`; };
       const countdown = () => {
         let n = 3; paused = true; clearTimeout(timer);
         const tick = () => { overlay.hidden = false; overlay.innerHTML = `<span class="sub">Feeding time</span><span class="count-big">${n || 'Go!'}</span>${RULES()}`; if (n > 0) { n--; timer = setTimeout(tick, 1200); } else timer = setTimeout(() => { overlay.hidden = true; paused = false; }, 550); };
@@ -1104,7 +1109,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       $('#kexit').onclick = exitFull;
       $('#kstart').onclick = () => { if (!isFull()) enterFull(); play(); };
       $('#khere').onclick = () => play();
-      overlay.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (!b) return; if (b.dataset.go === 'full' && !isFull()) enterFull(); play(); });
+      overlay.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (!b) return; if (b.dataset.go === 'full' && (guest ? !(document.fullscreenElement || document.webkitFullscreenElement) : !isFull())) enterFull(); play(); });
       $('#kptabs').addEventListener('click', e => { const b = e.target.closest('.ptab'); if (!b) return; focus = focus === b.dataset.p ? '' : b.dataset.p; store.set('koiFocus', focus); renderSide(); });
       const refreshShare = () => { if (guest) return; const L = link(); $('#klink').value = L; $('#kwa').href = 'https://wa.me/?text=' + encodeURIComponent(`Koi pond: ${names.length} names as fish food. Last one floating is the chosen one.\n${L}`); $('#kcmsg').textContent = ''; };
       const newPond = () => {
@@ -1121,7 +1126,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       const ro = new ResizeObserver(() => { size(); draw(); }); ro.observe(hi);
       const onList = () => { if (!running && !guest) newPond(); }; listeners.add(onList);
       size();
-      if (guest) { seed = guest.seed; names = guest.names; setup(); idle(`Pond #${pondId()} · ${names.length} names`, 'Who will be the chosen one?'); raf = requestAnimationFrame(idleLoop); }
+      if (guest) { wrapEl.classList.add('theatre', 'solo-guest'); document.documentElement.style.overflow = 'hidden'; setTimeout(size, 50); seed = guest.seed; names = guest.names; setup(); idle(); raf = requestAnimationFrame(idleLoop); }
       else { names = items(); const saved = store.get('koiSeed', 0); if (saved && names.length >= 2) { seed = saved; setup(); idle(`Pond #${pondId()} · ${names.length} names`, 'Feeding time'); refreshShare(); raf = requestAnimationFrame(idleLoop); } else newPond(); }
       return () => { running = true; cancelAnimationFrame(raf); running = false; clearTimeout(timer); stopConfetti(); ro.disconnect(); listeners.delete(onList); document.removeEventListener('fullscreenchange', onFs); document.removeEventListener('webkitfullscreenchange', onFs); document.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; };
     }
