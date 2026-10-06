@@ -12,6 +12,7 @@ Everything is in one file, `index.html`. There's no build step, no server code a
 |---|---|
 | Wheel | Spin a wheel of names. Can remove the winner after each spin. |
 | Space battle | Asteroids-style free-for-all over three rounds. Shareable, and plays identically for everyone. |
+| Koi pond | Names float as fish food. The koi eat them, and the last one left is the chosen one. Shareable. |
 | Out of a hat | Draw names one at a time without putting them back. |
 | Teams | Split the list into 2 to 20 teams of near-equal size. |
 | Running order | Shuffle the list into a numbered order, with a copy button. |
@@ -19,11 +20,12 @@ Everything is in one file, `index.html`. There's no build step, no server code a
 | Coin | Heads or tails, with a running tally and streak. |
 | Number | Random numbers in a range, with an optional no-repeats setting. |
 
-The Wheel, Space battle, Hat, Teams and Running order tabs all use the shared **Your list** box. Put one name per line.
+The Wheel, Space battle, Koi pond, Hat, Teams and Running order tabs all use the shared **Your list** box. Put one name per line.
 
 Full details are in the docs:
 
 - [docs/space-battle.md](docs/space-battle.md): game rules, how shared links work, the simulation spec
+- [docs/koi-pond.md](docs/koi-pond.md): how the koi pond works
 - [docs/tools.md](docs/tools.md): how each of the other pickers works
 - [docs/hosting.md](docs/hosting.md): putting it online so people without Claude can watch
 
@@ -54,5 +56,6 @@ Each viewer's browser keeps its own settings in `localStorage`, under keys that 
 | `battleSeed` | The current Space battle ID |
 | `battleSpeed` | The chosen Space battle speed |
 | `battleFocus` | The player this viewer is following |
+| `koiSeed`, `koiSpeed`, `koiFocus` | The same three settings for Koi pond |
 
 Nothing is sent to a server. If storage is blocked, as in some private windows, the page still works but forgets these between visits.

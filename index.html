@@ -280,6 +280,21 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
 .fs-list li em{font:400 10.5px var(--mono); color:#8A8A8A}
 .fs-list li.me{background:var(--accent); color:#111}
 .fs-list li.me em{color:#111}
+
+/* koi pond */
+.pond{aspect-ratio:1; background:#1E1E1E}
+.pond canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+.pond canvas.lofi{image-rendering:pixelated; image-rendering:crisp-edges}
+.kwrap .arena{width:min(100%, 640px); align-self:center}
+.arena-wrap.kwrap.theatre .arena,.arena-wrap.kwrap:fullscreen .arena{width:min(100%, calc(100vh - 150px))}
+.arena-wrap.kwrap.theatre .ptabs,.arena-wrap.kwrap:fullscreen .ptabs,.arena-wrap.kwrap.theatre .ptabs-label,.arena-wrap.kwrap:fullscreen .ptabs-label{width:min(100%, calc(100vh - 150px))}
+@media (orientation:landscape){
+  .arena-wrap.kwrap.theatre .arena,.arena-wrap.kwrap:fullscreen .arena,.arena-wrap.kwrap.theatre .ptabs,.arena-wrap.kwrap:fullscreen .ptabs,.arena-wrap.kwrap.theatre .ptabs-label,.arena-wrap.kwrap:fullscreen .ptabs-label{width:min(calc(100vw - 290px), calc(100vh - 150px))}
+  .arena-wrap.kwrap.theatre .fs-side,.arena-wrap.kwrap:fullscreen .fs-side{height:min(calc(100vw - 290px), calc(100vh - 150px))}
+}
+@media (orientation:portrait){
+  .arena-wrap.kwrap.theatre .arena,.arena-wrap.kwrap:fullscreen .arena{width:min(100%, calc(100vh - 150px))}
+}
 </style>
 <style>html{color-scheme:light}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -288,7 +303,7 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
 <div class="wrap">
   <header>
     <h1>Lucky <span>Dip</span></h1>
-    <p class="tag">Eight ways to let chance decide. Put your names in once and every list tool uses them.</p>
+    <p class="tag">Nine ways to let chance decide. Put your names in once and every list tool uses them.</p>
   </header>
 
   <nav class="tabs" role="tablist" id="tabs"></nav>
@@ -427,6 +442,7 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
   const decNames = str => { try { let b = str.replace(/-/g, '+').replace(/_/g, '/'); while (b.length % 4) b += '='; const bin = atob(b); return new TextDecoder().decode(Uint8Array.from(bin, ch => ch.charCodeAt(0))).split('\n').map(x => x.trim()).filter(Boolean); } catch { return []; } };
   const SPEEDS = [0.5, 0.75, 1, 2, 4], DEFAULT_SPEED = 0.75;
   const speedCode = v => 'x' + String(Math.round(v * 100)).padStart(3, '0');
+  const parseLink = (h, kind) => { const m = new RegExp('^' + kind + '\\.([0-9a-z]+)\\.([A-Za-z0-9_-]+)(?:\\.x(\\d{2,3}))?$').exec(h || ''); if (!m) return null; const names = decNames(m[2]); const seed = parseInt(m[1], 36) >>> 0; const sp = m[3] ? parseInt(m[3], 10) / 100 : DEFAULT_SPEED; return names.length >= 2 ? {seed, names, speed: SPEEDS.includes(sp) ? sp : DEFAULT_SPEED} : null; };
   const parseFight = h => { const m = /^fight\.([0-9a-z]+)\.([A-Za-z0-9_-]+)(?:\.x(\d{2,3}))?$/.exec(h || ''); if (!m) return null; const names = decNames(m[2]); const seed = parseInt(m[1], 36) >>> 0; const sp = m[3] ? parseInt(m[3], 10) / 100 : DEFAULT_SPEED; return names.length >= 2 ? {seed, names, speed: SPEEDS.includes(sp) ? sp : DEFAULT_SPEED} : null; };
   tools.battle = {
     name: 'Space battle', usesList: true,
@@ -733,6 +749,290 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
     }
   };
 
+  // KOI POND
+  tools.koi = {
+    name: 'Koi pond', usesList: true,
+    icon: icon('<path d="M3 12c3-5 9-6 13-3l5-3-1 6 1 6-5-3c-4 3-10 2-13-3z"/><circle cx="8" cy="11" r=".8" fill="currentColor"/>'),
+    mount(el, opts = {}){
+      const guest = opts.fight || null;
+      el.innerHTML = `
+        <div><p class="eyebrow">Feeding time</p><h2>Koi pond</h2><p class="lede">${guest ? `${guest.names.length} names floating as fish food. The koi eat them one by one, and the last name left is the chosen one. Everyone with this link watches the same pond.` : 'Every name floats on the pond as a pellet of fish food. The koi eat them one by one, and the last name left floating is the chosen one. Share it and everyone who opens the link watches the same feeding.'}</p></div>
+        <div class="row">
+          <button class="btn" id="kstart" type="button">Watch in full screen</button>
+          <button class="btn ghost" id="khere" type="button">Watch here</button>
+          ${guest ? '' : '<button class="btn ghost" id="knew" type="button">New pond</button>'}
+          ${guest ? '' : '<label class="f" for="kspeed" style="flex-direction:row; align-items:center; gap:8px">Speed<select id="kspeed" style="width:auto">' + SPEEDS.map(v => `<option value="${v}">${v}×</option>`).join('') + '</select></label>'}
+        </div>
+        <div class="arena-wrap kwrap" id="kwrap">
+          <div class="arena pond" id="kpond"><canvas id="klo" class="lofi" aria-label="Koi pond"></canvas><canvas id="khi" aria-hidden="true"></canvas><div class="hud" id="khud"></div><div class="ticker" id="kticker" aria-live="polite"></div><div class="overlay" id="ko"></div><canvas class="confetti" id="kconf" aria-hidden="true"></canvas></div>
+          <aside class="fs-side" aria-label="Still floating"><h3>Still floating <b id="kfscount"></b></h3><ol class="fs-list" id="kfsalive"></ol></aside>
+          <p class="ptabs-label">Tap your name to follow it</p>
+          <div class="ptabs" id="kptabs" aria-label="Follow a name"></div>
+          <button class="btn ghost small exitfs" id="kexit" type="button">Exit full screen</button>
+        </div>
+        ${guest ? '' : `<div class="share">
+          <div><p class="eyebrow">Share this pond</p><p class="note" style="margin-top:6px">Send the link once. Everyone who opens it sees the same koi, the same order of eating and the same chosen one, at the speed you pick here.</p></div>
+          <input id="klink" readonly aria-label="Pond link">
+          <div class="row"><a class="btn wa" id="kwa" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn ghost" id="kcopy" type="button">Copy link</button><span class="note" id="kcmsg" aria-live="polite"></span></div>
+        </div>`}
+        <div class="bgrid">
+          <div><p class="eyebrow" style="margin-bottom:8px">Still floating</p><div class="chips" id="kalive"></div></div>
+          <div><p class="eyebrow" style="margin-bottom:8px">Eaten</p><ol class="feed" id="kfeed"></ol></div>
+        </div>`;
+      const $ = s => el.querySelector(s);
+      const lo = $('#klo'), lctx = lo.getContext('2d'), hi = $('#khi'), hctx = hi.getContext('2d'), overlay = $('#ko'), hud = $('#khud'), ticker = $('#kticker'), wrapEl = $('#kwrap'), speedSel = $('#kspeed');
+      // world: a round pond in an 800 x 800 square, rendered at 240 px and scaled up
+      const W = 800, CX = 400, CY = 400, POND = 372, LO = 240, K = LO / W, DT = 1 / 120, TAU = Math.PI * 2, U = 1024;
+      const COS = new Float64Array(U), SIN = new Float64Array(U);
+      for (let i = 0; i < U; i++) { COS[i] = Math.round(Math.cos(i / U * TAU) * 1e9) / 1e9; SIN[i] = Math.round(Math.sin(i / U * TAU) * 1e9) / 1e9; }
+      const ix = a => ((Math.floor(a) % U) + U) % U;
+      const RAD = U / TAU; // heading units per radian
+      const mulberry = sd => { let a = sd >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+      const V = Math.random;
+      const TYPES = [
+        {label: 'Kohaku', base: '#EFE8DA', spot: '#D9472B'},
+        {label: 'Ogon', base: '#E3A43A', spot: '#F2C86A'},
+        {label: 'Showa', base: '#1D1B1B', spot: '#D9472B', spot2: '#EFE8DA'},
+        {label: 'Asagi', base: '#7C98AC', spot: '#D46A3A'},
+        {label: 'Tancho', base: '#EFE8DA', spot: '#D9472B', head: true},
+        {label: 'Chagoi', base: '#A9744A', spot: '#C9925F'},
+      ];
+      let R, seed, names, pellets = [], koi = [], eaten = [], pads = [], stones = [], t = 0, over = false, running = false, paused = false, raf = 0, last = 0, acc = 0, timer = 0, ripples = [], winner = null;
+      let focus = store.get('koiFocus', ''), conf = [], confRaf = 0, confTimers = [];
+      const pondId = () => seed.toString(36).toUpperCase();
+      const speed = () => speedSel ? +speedSel.value : guest.speed;
+      const link = () => `${ART_URL}#koi.${seed.toString(36)}.${encNames(names)}.${speedCode(speed())}`;
+      const inPond = (x, y, m) => { const dx = x - CX, dy = y - CY; return dx * dx + dy * dy < (POND - m) * (POND - m); };
+      const setup = () => {
+        R = mulberry(seed);
+        const n = names.length;
+        pellets = [];
+        for (let i = 0; i < n; i++) {
+          let x = CX, y = CY, tries = 0;
+          do { x = CX + (R() * 2 - 1) * (POND - 70); y = CY + (R() * 2 - 1) * (POND - 70); tries++; }
+          while ((!inPond(x, y, 70) || pellets.some(p => (p.x - x) ** 2 + (p.y - y) ** 2 < 62 * 62)) && tries < 60);
+          pellets.push({name: names[i], x, y, vx: (R() - .5) * 10, vy: (R() - .5) * 10, alive: true, bob: R() * TAU});
+        }
+        const nk = n <= 6 ? 3 : n <= 12 ? 4 : 5;
+        koi = Array.from({length: nk}, (_, k) => {
+          const a = Math.floor(R() * U), r0 = POND * (.35 + R() * .4);
+          const type = TYPES[(k + Math.floor(R() * TYPES.length)) % TYPES.length];
+          return {x: CX + COS[a] * r0, y: CY + SIN[a] * r0, a: R() * U, turn: 0, turnT: 0, target: null, cd: 2.5 + R() * 3, sp: 50, type, len: 64 + R() * 22, eats: 0,
+            spots: Array.from({length: 2 + Math.floor(R() * 3)}, () => ({s: .12 + R() * .6, off: (R() - .5) * .9, r: .28 + R() * .3, c: R() < .3 && type.spot2 ? 'spot2' : 'spot'})), spine: null, phase: R() * TAU};
+        });
+        const VR = mulberry(seed ^ 0x51ED); // scenery: same for everyone, never touches the simulation
+        pads = Array.from({length: 6}, () => { const a = VR() * TAU, r = POND * (.55 + VR() * .38); return {x: CX + Math.cos(a) * r, y: CY + Math.sin(a) * r, r: 26 + VR() * 26, rot: VR() * TAU, flower: VR() < .35}; });
+        stones = Array.from({length: 70}, (_, i) => { const a = i / 70 * TAU + VR() * .05; return {a, r: 14 + VR() * 16, tone: VR()}; });
+        eaten = []; t = 0; over = false; acc = 0; ripples = []; winner = null; ticker.textContent = '';
+        renderSide(); draw();
+      };
+      const d2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
+      const steer = (k, tx, ty) => { const k0 = ix(k.a), dx = tx - k.x, dy = ty - k.y, d = Math.sqrt(dx * dx + dy * dy) || 1; const cross = (COS[k0] * dy - SIN[k0] * dx) / d, dot = (COS[k0] * dx + SIN[k0] * dy) / d; return dot < 0 ? (cross >= 0 ? 1 : -1) : Math.max(-1, Math.min(1, cross * 3)); };
+      const eat = (k, p) => {
+        p.alive = false; k.target = null; k.eats++;
+        const left = pellets.filter(q => q.alive).length;
+        k.cd = (4.5 + R() * 6) * (left <= 3 ? 1.5 : 1);
+        for (const o of koi) if (o.target === p) o.target = null;
+        eaten.push({name: p.name, by: k.type.label, place: left + 1});
+        ripples.push({x: p.x, y: p.y, r: 4, life: 1.2, full: 1.2}, {x: p.x, y: p.y, r: 2, life: .8, full: .8});
+        ticker.textContent = (p.name === focus ? "That's you! " : '') + `#${left + 1} ${p.name} was eaten by the ${k.type.label}`;
+        renderSide();
+        if (left === 1) finish(pellets.find(q => q.alive));
+      };
+      const step = () => {
+        t += DT;
+        const alive = pellets.filter(p => p.alive);
+        for (const p of alive) {
+          if (R() < DT * .6) { p.vx += (R() - .5) * 8; p.vy += (R() - .5) * 8; }
+          p.vx *= .998; p.vy *= .998;
+          const sp = Math.sqrt(p.vx * p.vx + p.vy * p.vy); if (sp > 14) { p.vx *= 14 / sp; p.vy *= 14 / sp; }
+          p.x += p.vx * DT; p.y += p.vy * DT;
+          if (!inPond(p.x, p.y, 48)) { const dx = CX - p.x, dy = CY - p.y, d = Math.sqrt(dx * dx + dy * dy) || 1; p.vx = dx / d * 10; p.vy = dy / d * 10; }
+        }
+        for (const k of koi) {
+          k.cd -= DT;
+          if (k.target && !k.target.alive) k.target = null;
+          if (!k.target && k.cd <= 0 && alive.length > 1 && R() < DT * .9) { const a = alive[Math.floor(R() * alive.length)], b = alive[Math.floor(R() * alive.length)]; k.target = d2(k, a) <= d2(k, b) ? a : b; }
+          let turn, sp;
+          if (k.target) { turn = steer(k, k.target.x, k.target.y) * 2.6 * RAD; sp = 100; }
+          else { if ((k.turnT -= DT) <= 0) { k.turn = (R() * 2 - 1) * .9 * RAD; k.turnT = .8 + R() * 2; } turn = k.turn; sp = 46; }
+          if (!inPond(k.x, k.y, 70)) turn = steer(k, CX, CY) * 2.4 * RAD;
+          k.sp += (sp - k.sp) * .02;
+          k.a += turn * DT;
+          const kk = ix(k.a); k.x += COS[kk] * k.sp * DT; k.y += SIN[kk] * k.sp * DT;
+          for (const p of alive) { const q = d2(k, p); if (q < 34 * 34 && p !== k.target) { const d = Math.sqrt(q) || 1; p.vx += (p.x - k.x) / d * 18 * DT; p.vy += (p.y - k.y) / d * 18 * DT; } }
+          if (k.target && d2(k, k.target) < 14 * 14) eat(k, k.target);
+          if (over) return;
+        }
+      };
+      // ---- drawing: low-res pond, crisp labels on top
+      const size = () => { const w = hi.clientWidth, d = devicePixelRatio || 1; if (!w) return; lo.width = LO; lo.height = LO; hi.width = w * d; hi.height = w * d; hctx.setTransform(d * w / W, 0, 0, d * w / W, 0, 0); lctx.setTransform(K, 0, 0, K, 0, 0); };
+      const spineOf = k => {
+        const n = 10, seg = k.len / n;
+        if (!k.spine) { const kk = ix(k.a); k.spine = Array.from({length: n + 1}, (_, i) => ({x: k.x - COS[kk] * seg * i, y: k.y - SIN[kk] * seg * i})); }
+        const s = k.spine; s[0].x = k.x; s[0].y = k.y;
+        for (let i = 1; i <= n; i++) { const dx = s[i].x - s[i - 1].x, dy = s[i].y - s[i - 1].y, d = Math.sqrt(dx * dx + dy * dy) || 1; s[i].x = s[i - 1].x + dx / d * seg; s[i].y = s[i - 1].y + dy / d * seg; }
+        return s;
+      };
+      const bodyPath = (c, k, s, ox = 0, oy = 0) => {
+        const n = s.length - 1, maxW = k.len * .15, L = [], Rr = [];
+        for (let i = 0; i <= n; i++) {
+          const a = s[Math.max(0, i - 1)], b = s[Math.min(n, i + 1)], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+          const f = i / n, w = maxW * (f < .25 ? .55 + f * 1.8 : Math.max(.08, 1 - (f - .25) * 1.15));
+          L.push([s[i].x - dy / d * w + ox, s[i].y + dx / d * w + oy]); Rr.push([s[i].x + dy / d * w + ox, s[i].y - dx / d * w + oy]);
+        }
+        c.beginPath(); c.moveTo(L[0][0], L[0][1]); for (const p of L) c.lineTo(p[0], p[1]); for (let i = Rr.length - 1; i >= 0; i--) c.lineTo(Rr[i][0], Rr[i][1]); c.closePath();
+      };
+      const drawKoi = (c, k, now) => {
+        const s = spineOf(k), n = s.length - 1, tail = s[n], pre = s[n - 1];
+        const wig = Math.sin(now / (k.target ? 90 : 160) + k.phase) * .5;
+        // wiggle the spine a touch for swimming
+        for (let i = 2; i <= n; i++) { const a = s[i - 1], b = s[i], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1, w = Math.sin(now / (k.target ? 90 : 160) + k.phase - i * .6) * i * .35; b.x += -dy / d * w * .15; b.y += dx / d * w * .15; }
+        // shadow
+        bodyPath(c, k, s, 9, 12); c.fillStyle = 'rgba(0,0,0,.28)'; c.fill();
+        // tail
+        const tx = tail.x - pre.x, ty = tail.y - pre.y, td = Math.sqrt(tx * tx + ty * ty) || 1, ux = tx / td, uy = ty / td, fl = k.len * .22;
+        c.beginPath(); c.moveTo(pre.x, pre.y);
+        c.lineTo(tail.x + ux * fl - uy * fl * (.6 + wig), tail.y + uy * fl + ux * fl * (.6 + wig));
+        c.lineTo(tail.x + ux * fl * .6, tail.y + uy * fl * .6);
+        c.lineTo(tail.x + ux * fl + uy * fl * (.6 - wig), tail.y + uy * fl - ux * fl * (.6 - wig));
+        c.closePath(); c.fillStyle = k.type.base; c.globalAlpha = .8; c.fill(); c.globalAlpha = 1;
+        // pectoral fins
+        const h1 = s[2], h0 = s[1], fx = h1.x - h0.x, fy = h1.y - h0.y, fd = Math.sqrt(fx * fx + fy * fy) || 1, px = -fy / fd, py = fx / fd, fw = k.len * .2;
+        c.fillStyle = k.type.base; c.globalAlpha = .7;
+        for (const sg of [1, -1]) { c.beginPath(); c.moveTo(h1.x, h1.y); c.lineTo(h1.x + px * fw * sg + fx / fd * fw * .8, h1.y + py * fw * sg + fy / fd * fw * .8); c.lineTo(h1.x + px * fw * .5 * sg + fx / fd * fw * 1.2, h1.y + py * fw * .5 * sg + fy / fd * fw * 1.2); c.closePath(); c.fill(); }
+        c.globalAlpha = 1;
+        // body + spots
+        bodyPath(c, k, s); c.fillStyle = k.type.base; c.fill();
+        c.save(); bodyPath(c, k, s); c.clip();
+        for (const sp of k.spots) { const i = Math.round(sp.s * n), a = s[i], b = s[Math.min(n, i + 1)], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1; c.fillStyle = k.type[sp.c] || k.type.spot; c.beginPath(); c.arc(a.x - dy / d * sp.off * k.len * .12, a.y + dx / d * sp.off * k.len * .12, k.len * .13 * sp.r * 1.6, 0, TAU); c.fill(); }
+        if (k.type.head) { c.fillStyle = k.type.spot; c.beginPath(); c.arc(s[1].x, s[1].y, k.len * .07, 0, TAU); c.fill(); }
+        c.restore();
+      };
+      const draw = () => {
+        const now = performance.now(), c = lctx;
+        c.fillStyle = '#1E1E1E'; c.fillRect(0, 0, W, W);
+        // stone rim
+        for (const st of stones) { const r = POND + 10; c.fillStyle = st.tone < .33 ? '#4A4A46' : st.tone < .66 ? '#5B5A54' : '#3C3C39'; c.beginPath(); c.arc(CX + Math.cos(st.a) * r, CY + Math.sin(st.a) * r, st.r, 0, TAU); c.fill(); }
+        // water
+        c.fillStyle = '#16403E'; c.beginPath(); c.arc(CX, CY, POND, 0, TAU); c.fill();
+        c.fillStyle = '#1B4A47'; c.beginPath(); c.arc(CX - 40, CY - 50, POND * .72, 0, TAU); c.fill();
+        c.save(); c.beginPath(); c.arc(CX, CY, POND, 0, TAU); c.clip();
+        // drifting light patches
+        c.fillStyle = 'rgba(120,200,190,.06)';
+        for (let i = 0; i < 7; i++) { const a = now / 9000 + i * 1.7; c.beginPath(); c.ellipse(CX + Math.cos(a) * 220 * Math.sin(i), CY + Math.sin(a * .8) * 200, 90, 40, a, 0, TAU); c.fill(); }
+        for (const k of koi) drawKoi(c, k, now);
+        // pellets
+        for (const p of pellets) if (p.alive) { const bob = Math.sin(now / 500 + p.bob) * 1.5; c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.arc(p.x + 4, p.y + 5, 7, 0, TAU); c.fill(); c.fillStyle = p === winner ? '#F2C86A' : '#C9A46C'; c.beginPath(); c.arc(p.x, p.y + bob, 7, 0, TAU); c.fill(); c.fillStyle = '#E5CB98'; c.beginPath(); c.arc(p.x - 2, p.y + bob - 2, 3, 0, TAU); c.fill(); }
+        // ripples
+        c.lineWidth = 4;
+        for (const g of ripples) { const k = 1 - g.life / g.full; c.strokeStyle = `rgba(220,240,235,${(g.life / g.full) * .7})`; c.beginPath(); c.arc(g.x, g.y, g.r + k * 60, 0, TAU); c.stroke(); }
+        c.restore();
+        // lily pads above the fish
+        for (const pd of pads) { c.fillStyle = '#3F6A3A'; c.beginPath(); c.moveTo(pd.x, pd.y); c.arc(pd.x, pd.y, pd.r, pd.rot + .35, pd.rot + TAU - .05); c.closePath(); c.fill(); c.fillStyle = '#4E7E45'; c.beginPath(); c.arc(pd.x - pd.r * .2, pd.y - pd.r * .2, pd.r * .45, 0, TAU); c.fill(); if (pd.flower) { c.fillStyle = '#E79AAE'; c.beginPath(); c.arc(pd.x + pd.r * .25, pd.y + pd.r * .1, pd.r * .28, 0, TAU); c.fill(); c.fillStyle = '#F4D06A'; c.beginPath(); c.arc(pd.x + pd.r * .25, pd.y + pd.r * .1, pd.r * .1, 0, TAU); c.fill(); } }
+        // crisp layer: labels and focus ring
+        const h = hctx; h.clearRect(0, 0, W, W);
+        const sc = hi.clientWidth / W || 1, fs = Math.max(11, 11 / sc);
+        h.font = `500 ${fs}px "IBM Plex Mono", ui-monospace, monospace`; h.textAlign = 'center'; h.textBaseline = 'bottom';
+        for (const p of pellets) if (p.alive) {
+          const me = p.name === focus;
+          if (me || p === winner) { const pr = 18 + Math.sin(now / 200) * 3; h.strokeStyle = p === winner ? '#F2C86A' : '#FF9A00'; h.lineWidth = 2.5 / sc > 2.5 ? 2.5 / sc : 2.5; h.beginPath(); h.arc(p.x, p.y, pr, 0, TAU); h.stroke(); }
+          const label = me ? `${p.name} (you)` : p.name;
+          h.lineWidth = 3 / sc; h.strokeStyle = 'rgba(10,20,20,.85)'; h.strokeText(label, p.x, p.y - 14);
+          h.fillStyle = me ? '#FF9A00' : p === winner ? '#F2C86A' : '#E8E4DA'; h.fillText(label, p.x, p.y - 14);
+        }
+        hud.textContent = `Pond #${pondId()}` + (running && !over ? ` · ${pellets.filter(p => p.alive).length} left · ${Math.floor(t)}s` : '');
+      };
+      const renderSide = () => {
+        const alive = pellets.filter(p => p.alive);
+        $('#kalive').innerHTML = alive.map(p => `<span class="chip">${esc(p.name)}</span>`).join('') || '<span class="note">Nobody.</span>';
+        $('#kfeed').innerHTML = eaten.length ? eaten.slice().reverse().map(o => `<li><b>#${o.place}</b><span>${esc(o.name)} · eaten by the ${o.by}</span></li>`).join('') : '<li class="note">Nobody eaten yet.</li>';
+        $('#kfscount').textContent = alive.length;
+        $('#kfsalive').innerHTML = alive.map(p => `<li class="${p.name === focus ? 'me' : ''}"><i style="background:#C9A46C"></i><span>${esc(p.name)}${p.name === focus ? ' (you)' : ''}</span><em></em></li>`).join('');
+        const tabs = $('#kptabs'), keep = tabs.scrollLeft;
+        tabs.innerHTML = names.map(n => { const e = eaten.find(o => o.name === n), p = pellets.find(q => q.name === n);
+          return `<button class="ptab${e ? ' out' : ''}" type="button" data-p="${esc(n)}" aria-pressed="${focus === n}"><i style="background:${e ? '#555' : '#C9A46C'}"></i>${esc(n)}<span class="st">${e ? `Eaten #${e.place}` : p === winner ? 'Chosen' : 'Floating'}</span></button>`; }).join('');
+        tabs.scrollLeft = keep;
+      };
+      const RULES = () => `<ul class="rules"><li><b>●</b>Every name floats as a pellet of fish food</li><li><b>${koi.length}</b>${koi.length} koi eat them one at a time</li><li><b>1</b>The last name left floating is the chosen one</li><li><b>@</b>Tap your name below to follow it</li></ul>`;
+      const idle = (sub, big) => { overlay.hidden = false; overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span>${RULES()}<div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`; };
+      const countdown = () => {
+        let n = 3; paused = true; clearTimeout(timer);
+        const tick = () => { overlay.hidden = false; overlay.innerHTML = `<span class="sub">Feeding time</span><span class="count-big">${n || 'Go!'}</span>${RULES()}`; if (n > 0) { n--; timer = setTimeout(tick, 1200); } else timer = setTimeout(() => { overlay.hidden = true; paused = false; }, 550); };
+        tick();
+      };
+      const finish = p => {
+        over = true; winner = p; renderSide(); ticker.textContent = '';
+        timer = setTimeout(() => {
+          overlay.hidden = false;
+          overlay.innerHTML = `<span class="sub">Pond #${pondId()} · the chosen one</span><span class="headline" style="color:#F2C86A">${esc(p.name)}${p.name === focus ? ' (you!)' : ''}</span><span class="sub">Last one floating after ${Math.round(t)} seconds</span><div class="row" style="justify-content:center"><button class="btn ghost" data-go="here" type="button">Watch it again</button></div>`;
+          confetti(['#F2C86A', '#EFE8DA', '#D9472B', '#E79AAE'], 220);
+        }, 1400);
+        confTimers.push(setTimeout(() => { if (over) running = false; }, 9000));
+      };
+      // confetti
+      const cc = $('#kconf'), cctx = cc.getContext('2d');
+      const confetti = (colors, n) => {
+        if (reduced) return;
+        const w = cc.clientWidth, h = cc.clientHeight, d = devicePixelRatio || 1; if (!w) return;
+        if (!confRaf) { cc.width = w * d; cc.height = h * d; cctx.setTransform(d, 0, 0, d, 0, 0); }
+        for (let i = 0; i < n; i++) conf.push({x: V() * w, y: -10 - V() * h * .35, vx: (V() - .5) * 140, vy: 40 + V() * 140, r: V() * TAU, vr: (V() - .5) * 12, w: 5 + V() * 5, h: 3 + V() * 3, c: colors[i % colors.length], life: 3 + V() * 2.5});
+        if (confRaf) return;
+        let lt = performance.now();
+        const frame = now => { const dt = Math.min(.05, (now - lt) / 1000); lt = now; const cw = cc.width / d, ch = cc.height / d; cctx.clearRect(0, 0, cw, ch);
+          for (const p of conf) { p.vy = Math.min(p.vy + 260 * dt, 240); p.x += (p.vx + Math.sin(p.r) * 30) * dt; p.y += p.vy * dt; p.r += p.vr * dt; p.life -= dt; cctx.save(); cctx.translate(p.x, p.y); cctx.rotate(p.r); cctx.globalAlpha = Math.max(0, Math.min(1, p.life)); cctx.fillStyle = p.c; cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); cctx.restore(); }
+          conf = conf.filter(p => p.life > 0 && p.y < ch + 20); confRaf = conf.length ? requestAnimationFrame(frame) : (cctx.clearRect(0, 0, cw, ch), 0); };
+        confRaf = requestAnimationFrame(frame);
+      };
+      const stopConfetti = () => { confTimers.forEach(clearTimeout); confTimers = []; cancelAnimationFrame(confRaf); confRaf = 0; conf = []; cctx.clearRect(0, 0, cc.width, cc.height); };
+      const loop = now => {
+        const real = Math.min(.1, (now - last) / 1000); last = now;
+        for (const g of ripples) g.life -= real; ripples = ripples.filter(g => g.life > 0);
+        if (!over && !paused) { acc += real * speed(); while (acc >= DT && !over) { step(); acc -= DT; } }
+        else if (over) { for (const k of koi) { k.a += .3 * RAD * real; const kk = ix(k.a); k.x += COS[kk] * 40 * real; k.y += SIN[kk] * 40 * real; } }
+        draw();
+        if (running) raf = requestAnimationFrame(loop);
+      };
+      const play = () => { cancelAnimationFrame(raf); clearTimeout(timer); stopConfetti(); setup(); countdown(); running = true; last = performance.now(); raf = requestAnimationFrame(loop); };
+      // ambient idle animation so the pond looks alive before play
+      const idleLoop = now => { if (running) return; for (const k of koi) k.phase += .02; draw(); raf = requestAnimationFrame(idleLoop); };
+      // full screen
+      const isFull = () => document.fullscreenElement === wrapEl || document.webkitFullscreenElement === wrapEl || wrapEl.classList.contains('theatre');
+      const enterFull = () => {
+        const req = wrapEl.requestFullscreen || wrapEl.webkitRequestFullscreen;
+        const fallback = () => { wrapEl.classList.add('theatre'); document.documentElement.style.overflow = 'hidden'; setTimeout(size, 50); };
+        if (req) { try { const p = req.call(wrapEl); if (p && p.catch) p.catch(fallback); } catch { fallback(); } } else fallback();
+      };
+      const exitFull = () => { if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); else if (document.webkitFullscreenElement) document.webkitExitFullscreen(); wrapEl.classList.remove('theatre'); document.documentElement.style.overflow = ''; setTimeout(size, 50); };
+      const onFs = () => setTimeout(() => { size(); draw(); }, 60);
+      document.addEventListener('fullscreenchange', onFs); document.addEventListener('webkitfullscreenchange', onFs);
+      const onKey = e => { if (e.key === 'Escape' && wrapEl.classList.contains('theatre')) exitFull(); }; document.addEventListener('keydown', onKey);
+      $('#kexit').onclick = exitFull;
+      $('#kstart').onclick = () => { if (!isFull()) enterFull(); play(); };
+      $('#khere').onclick = () => play();
+      overlay.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (!b) return; if (b.dataset.go === 'full' && !isFull()) enterFull(); play(); });
+      $('#kptabs').addEventListener('click', e => { const b = e.target.closest('.ptab'); if (!b) return; focus = focus === b.dataset.p ? '' : b.dataset.p; store.set('koiFocus', focus); renderSide(); });
+      const refreshShare = () => { if (guest) return; const L = link(); $('#klink').value = L; $('#kwa').href = 'https://wa.me/?text=' + encodeURIComponent(`Koi pond: ${names.length} names as fish food. Last one floating is the chosen one.\n${L}`); $('#kcmsg').textContent = ''; };
+      const newPond = () => {
+        running = false; paused = false; cancelAnimationFrame(raf); clearTimeout(timer); stopConfetti();
+        names = items(); seed = rand(0x7fffffff) + 1; store.set('koiSeed', seed);
+        if (names.length < 2) { overlay.hidden = false; overlay.innerHTML = '<span class="sub">Not enough names</span><span class="headline">Add at least two names</span>'; pellets = []; koi = []; draw(); return; }
+        setup(); idle(`Pond #${pondId()} · ${names.length} names`, 'Feeding time'); refreshShare(); raf = requestAnimationFrame(idleLoop);
+      };
+      if (!guest) {
+        $('#kcopy').onclick = () => { const inp = $('#klink'), msg = $('#kcmsg'); navigator.clipboard.writeText(inp.value).then(() => msg.textContent = 'Copied', () => { inp.focus(); inp.select(); msg.textContent = 'Selected, press copy'; }); };
+        $('#knew').onclick = newPond;
+        const sv = store.get('koiSpeed', 1); speedSel.value = String(SPEEDS.includes(sv) ? sv : 1); speedSel.onchange = () => { store.set('koiSpeed', +speedSel.value); refreshShare(); };
+      }
+      const ro = new ResizeObserver(() => { size(); draw(); }); ro.observe(hi);
+      const onList = () => { if (!running && !guest) newPond(); }; listeners.add(onList);
+      size();
+      if (guest) { seed = guest.seed; names = guest.names; setup(); idle(`Pond #${pondId()} · ${names.length} names`, 'Who will be the chosen one?'); raf = requestAnimationFrame(idleLoop); }
+      else { names = items(); const saved = store.get('koiSeed', 0); if (saved && names.length >= 2) { seed = saved; setup(); idle(`Pond #${pondId()} · ${names.length} names`, 'Feeding time'); refreshShare(); raf = requestAnimationFrame(idleLoop); } else newPond(); }
+      return () => { running = true; cancelAnimationFrame(raf); running = false; clearTimeout(timer); stopConfetti(); ro.disconnect(); listeners.delete(onList); document.removeEventListener('fullscreenchange', onFs); document.removeEventListener('webkitfullscreenchange', onFs); document.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; };
+    }
+  };
+
   // HAT
   tools.hat = {
     name: 'Out of a hat', usesList: true,
@@ -928,24 +1228,24 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
 
   // ---------- tabs ----------
   const tabsEl = document.getElementById('tabs'), toolEl = document.getElementById('tool'), stage = document.getElementById('stage'), listPanel = document.getElementById('listPanel');
-  const order = ['wheel', 'battle', 'hat', 'teams', 'order', 'dice', 'coin', 'number'];
+  const order = ['wheel', 'battle', 'koi', 'hat', 'teams', 'order', 'dice', 'coin', 'number'];
   tabsEl.innerHTML = order.map(k => `<button class="tab" role="tab" id="tab-${k}" data-k="${k}" aria-selected="false" type="button">${tools[k].icon}${tools[k].name}</button>`).join('');
   let cleanup = null;
-  let fight = parseFight(location.hash.slice(1));
+  let fight = parseFight(location.hash.slice(1)), koiLink = parseLink(location.hash.slice(1), 'koi');
   const open = k => {
     if (!tools[k]) k = 'wheel';
-    const g = k === 'battle' && fight;
+    const g = (k === 'battle' && fight) || (k === 'koi' && koiLink);
     document.body.classList.toggle('guest', !!g);
     if (cleanup) { cleanup(); cleanup = null; }
     tabsEl.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.k === k));
     const showList = tools[k].usesList && !g;
     listPanel.hidden = !showList; stage.classList.toggle('solo', !showList);
-    toolEl.innerHTML = ''; cleanup = tools[k].mount(toolEl, g ? {fight, leave: () => { fight = null; open('battle'); }} : {}) || null;
+    toolEl.innerHTML = ''; cleanup = tools[k].mount(toolEl, g ? {fight: g} : {}) || null;
     if (!g) store.set('tab', k);
   };
-  tabsEl.addEventListener('click', e => { const b = e.target.closest('.tab'); if (!b) return; if (b.dataset.k !== 'battle') fight = null; open(b.dataset.k); });
+  tabsEl.addEventListener('click', e => { const b = e.target.closest('.tab'); if (!b) return; if (b.dataset.k !== 'battle') fight = null; if (b.dataset.k !== 'koi') koiLink = null; open(b.dataset.k); });
   const hash = location.hash.slice(1);
-  open(fight ? 'battle' : tools[hash] ? hash : store.get('tab', 'wheel'));
+  open(fight ? 'battle' : koiLink ? 'koi' : tools[hash] ? hash : store.get('tab', 'wheel'));
 })();
 </script>
 
