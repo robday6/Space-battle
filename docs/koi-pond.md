@@ -53,3 +53,18 @@ Everything is in `index.html`, inside `tools.koi`:
 | Drawing | `draw()`, `drawKoi()`, `bodyPath()`, `spineOf()` |
 | Ending | `finish()` |
 | Link parsing (shared with Space battle) | `parseLink()` |
+
+## Fish introductions
+
+After Play is pressed, and before the countdown, each koi gets a short turn on stage (2.3 seconds each):
+
+- It swims in from the left, does a weird little move, and swims off to the right. The moves are: chasing its tail, a zigzag, hops, a figure of eight, a shiver, and losing the plot.
+- It has big googly eyes, a gulping mouth and rising bubbles.
+- Its name ("the kohaku") appears above it, and a strange fact about it is typed out below like a terminal, for example "is legally three fish".
+- **Skip intro** jumps straight to the countdown.
+
+Which move and fact each fish gets comes from the pond's seed, so everyone with the same link sees the same intro. The intro is visual only and doesn't change who gets eaten. Code: `startIntro()`, `drawIntro()`, `endIntro()`, `MOVES`, `TRAITS`.
+
+## Shared links
+
+A shared pond link opens straight into a full-screen pond with a single Play button. There is no header, tabs, list or other controls.

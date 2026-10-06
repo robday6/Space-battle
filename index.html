@@ -282,6 +282,7 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
 .fs-list li.me em{color:#111}
 
 /* koi pond */
+.kskip{position:absolute; right:10px; bottom:8px; z-index:4}
 body.guest header{display:none}
 .arena-wrap.kwrap.solo-guest{display:flex!important; flex-direction:column; align-items:center; justify-content:center; padding:12px}
 .arena-wrap.kwrap.solo-guest .fs-side,.arena-wrap.kwrap.solo-guest .ptabs,.arena-wrap.kwrap.solo-guest .ptabs-label,.arena-wrap.kwrap.solo-guest .exitfs,.arena-wrap.kwrap.solo-guest .turn-hint{display:none!important}
@@ -791,7 +792,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         hud.textContent = `battle #${battleId().toLowerCase()}` + (running && !over ? ` ${bar(ships.length - ships.filter(s => s.alive).length, ships.length - 1)} round ${round + 1}/${totalRounds()} · ${ships.filter(s => s.alive).length} left · ${Math.floor(t)}s${t > 25 ? ' · firing faster' : ''}` : '');
       };
       const loop = now => {
-        const real = Math.min(.1, (now - last) / 1000); last = now;
+        const real = Math.max(0, Math.min(.1, (now - last) / 1000)); last = now;
         for (const p of parts) { p.x += p.vx * real; p.y += p.vy * real; p.life -= real; p.vx *= .95; p.vy *= .95; }
         for (const g of rings) g.life -= real; rings = rings.filter(g => g.life > 0);
         for (const d of debris) { d.x += d.vx * real; d.y += d.vy * real; d.a += d.va * real; d.vx *= .985; d.vy *= .985; d.life -= real; } debris = debris.filter(d => d.life > 0);
@@ -864,7 +865,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           ${guest ? '' : '<label class="f" for="kspeed" style="flex-direction:row; align-items:center; gap:8px">Speed<select id="kspeed" style="width:auto">' + SPEEDS.map(v => `<option value="${v}">${v}×</option>`).join('') + '</select></label>'}
         </div>
         <div class="arena-wrap kwrap" id="kwrap">
-          <div class="arena pond" id="kpond"><canvas id="klo" class="lofi" aria-label="Koi pond"></canvas><canvas id="khi" aria-hidden="true"></canvas><div class="hud" id="khud"></div><div class="ticker" id="kticker" aria-live="polite"></div><div class="overlay" id="ko"></div><canvas class="confetti" id="kconf" aria-hidden="true"></canvas></div>
+          <div class="arena pond" id="kpond"><canvas id="klo" class="lofi" aria-label="Koi pond"></canvas><canvas id="khi" aria-hidden="true"></canvas><div class="hud" id="khud"></div><div class="ticker" id="kticker" aria-live="polite"></div><div class="overlay" id="ko"></div><canvas class="confetti" id="kconf" aria-hidden="true"></canvas><button class="btn small kskip" id="kskip" type="button" hidden>skip intro</button></div>
           <aside class="fs-side" aria-label="Still floating"><h3>Still floating <b id="kfscount"></b></h3><ol class="fs-list" id="kfsalive"></ol></aside>
           <div class="ptabs" id="kptabs" aria-label="Follow a name"></div>
           <button class="btn ghost small exitfs" id="kexit" type="button">Exit full screen</button>
@@ -1084,15 +1085,75 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         confRaf = requestAnimationFrame(frame);
       };
       const stopConfetti = () => { confTimers.forEach(clearTimeout); confTimers = []; cancelAnimationFrame(confRaf); confRaf = 0; conf = []; cctx.clearRect(0, 0, cc.width, cc.height); };
+      // ---- intro: each koi does a weird little turn before feeding time (visual only)
+      const TRAITS = ['has never once blinked', 'is 40% teeth, 60% vibes', 'believes it is a duck', 'swims anticlockwise on principle', 'remembers every name it has eaten', 'is legally three fish', 'only eats names with vowels', 'was a goldfish in a past life', 'hums when nobody is watching', 'has strong opinions about jazz', 'is not allowed back in the big pond', 'knows what you did'];
+      const MOVES = [
+        (tt, a) => ({dx: Math.cos(tt * 7) * 80 * a, dy: Math.sin(tt * 7) * 80 * a, name: 'chases its tail'}),
+        (tt, a) => ({dx: 0, dy: Math.sin(tt * 15) * 46 * a, name: 'does the zigzag'}),
+        (tt, a) => ({dx: Math.sin(tt * 3) * 30 * a, dy: -Math.abs(Math.sin(tt * 6)) * 150 * a, name: 'hops'}),
+        (tt, a) => ({dx: Math.sin(tt * 4) * 120 * a, dy: Math.sin(tt * 8) * 50 * a, name: 'does a figure of eight'}),
+        (tt, a) => ({dx: (V() - .5) * 26 * a, dy: (V() - .5) * 26 * a, name: 'has a little shiver'}),
+        (tt, a) => ({dx: Math.cos(tt * 11) * 36 * a, dy: Math.sin(tt * 5.5) * 90 * a, name: 'loses the plot'}),
+      ];
+      const PER = 2.3;
+      let intro = null;
+      const easeIO = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+      const startIntro = () => {
+        const VR = mulberry(seed ^ 0xF15A), tr = TRAITS.slice(); for (let i = tr.length - 1; i > 0; i--) { const j = Math.floor(VR() * (i + 1)); [tr[i], tr[j]] = [tr[j], tr[i]]; }
+        const mv = MOVES.map((_, i) => i); for (let i = mv.length - 1; i > 0; i--) { const j = Math.floor(VR() * (i + 1)); [mv[i], mv[j]] = [mv[j], mv[i]]; }
+        intro = {t: 0, bubbles: [], fish: koi.map((k, i) => ({...k, spine: null, len: k.len * 2.6, x: -260, y: CY + 60, a: 0, target: null, trait: tr[i % tr.length], move: MOVES[mv[i % mv.length]]}))};
+        paused = true; overlay.hidden = true; $('#kskip').hidden = false;
+      };
+      const endIntro = () => { intro = null; $('#kskip').hidden = true; hctx.clearRect(0, 0, W, W); draw(); countdown(); };
+      const drawIntro = (now, real) => {
+        intro.t += real;
+        const i = Math.floor(intro.t / PER);
+        if (i >= intro.fish.length) { endIntro(); return; }
+        const tt = intro.t - i * PER, u = tt / PER, f = intro.fish[i], c = lctx;
+        if (tt < real * 1.5) { f.spine = null; f.x = -260; f.y = CY + 60; f.a = 0; }
+        c.fillStyle = '#000000'; c.fillRect(0, 0, W, W);
+        c.fillStyle = '#16403E'; c.beginPath(); c.arc(CX, CY, POND, 0, TAU); c.fill();
+        c.fillStyle = '#1B4A47'; c.beginPath(); c.arc(CX - 40, CY - 50, POND * .72, 0, TAU); c.fill();
+        const enter = easeIO(Math.min(1, u / .2)), leave = easeIO(Math.max(0, (u - .8) / .2));
+        const act = u < .2 || u > .8 ? 0 : Math.sin(Math.PI * (u - .2) / .6);
+        const m = f.move(tt, act);
+        const hx = -260 + enter * (CX + 260) + leave * 700 + m.dx, hy = CY + 60 + m.dy;
+        const vx = hx - f.x, vy = hy - f.y; if (vx * vx + vy * vy > .25) f.a = Math.atan2(vy, vx) * RAD;
+        f.x = hx; f.y = hy; f.target = act > .2 ? 1 : null;
+        c.save(); c.beginPath(); c.arc(CX, CY, POND, 0, TAU); c.clip();
+        drawKoi(c, f, now);
+        // googly eyes and a gulping mouth
+        const s = f.spine, h0 = s[0], h1 = s[1], ex = h0.x - h1.x, ey = h0.y - h1.y, ed = Math.sqrt(ex * ex + ey * ey) || 1, px = -ey / ed, py = ex / ed, er = f.len * .05;
+        for (const sg of [1, -1]) { const x = h1.x + ex / ed * f.len * .03 + px * f.len * .075 * sg, y = h1.y + ey / ed * f.len * .03 + py * f.len * .075 * sg; c.fillStyle = '#FFFFFF'; c.beginPath(); c.arc(x, y, er, 0, TAU); c.fill(); c.fillStyle = '#000000'; c.beginPath(); c.arc(x + Math.sin(now / 90 + sg) * er * .45, y + Math.cos(now / 110 + sg) * er * .45, er * .5, 0, TAU); c.fill(); }
+        const mo = f.len * .028 * (.4 + .6 * Math.abs(Math.sin(now / 140))); c.fillStyle = '#2A0A08'; c.beginPath(); c.arc(h0.x + ex / ed * f.len * .02, h0.y + ey / ed * f.len * .02, mo, 0, TAU); c.fill();
+        if (V() < real * 9) intro.bubbles.push({x: h0.x + (V() - .5) * 10, y: h0.y - 10, r: 4 + V() * 7, life: 1.4});
+        for (const b of intro.bubbles) { b.y -= 70 * real; b.x += Math.sin(now / 200 + b.r) * 20 * real; b.life -= real; c.strokeStyle = `rgba(210,240,235,${Math.max(0, b.life) * .7})`; c.lineWidth = 3; c.beginPath(); c.arc(b.x, b.y, b.r, 0, TAU); c.stroke(); }
+        intro.bubbles = intro.bubbles.filter(b => b.life > 0);
+        c.restore();
+        // name card, typed out like a terminal
+        const h = hctx; h.clearRect(0, 0, W, W); h.textAlign = 'center'; h.textBaseline = 'alphabetic';
+        const title = `the ${f.type.label.toLowerCase()}`, l1 = f.trait, l2 = m.name, n = Math.max(0, Math.floor((u - .12) * 95)), t1 = l1.slice(0, n), t2 = l2.slice(0, Math.max(0, n - l1.length - 4));
+        h.globalAlpha = Math.min(1, u * 6, (1 - u) * 6);
+        h.font = '400 20px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#2FA52F'; h.fillText(`fish ${i + 1}/${intro.fish.length}`, CX, 150);
+        h.font = '500 50px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#4FE34F'; h.fillText(title, CX, 210);
+        h.font = '400 22px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#4FE34F';
+        const cursor = Math.floor(now / 530) % 2 ? '█' : ' ';
+        h.textAlign = 'left'; const lx = CX - 300;
+        h.fillText('> ' + t1 + (t2 || n <= l1.length ? (n <= l1.length ? cursor : '') : cursor), lx, 660);
+        if (n > l1.length + 4) h.fillText('> ' + t2 + cursor, lx, 694);
+        h.globalAlpha = 1;
+        hud.textContent = '';
+      };
       const loop = now => {
-        const real = Math.min(.1, (now - last) / 1000); last = now;
+        const real = Math.max(0, Math.min(.1, (now - last) / 1000)); last = now;
+        if (intro) { drawIntro(now, real); if (running) raf = requestAnimationFrame(loop); return; }
         for (const g of ripples) g.life -= real; ripples = ripples.filter(g => g.life > 0);
         if (!over && !paused) { acc += real * speed(); while (acc >= DT && !over) { step(); acc -= DT; } }
         else if (over) { for (const k of koi) { k.a += .3 * RAD * real; const kk = ix(k.a); k.x += COS[kk] * 40 * real; k.y += SIN[kk] * 40 * real; } }
         draw();
         if (running) raf = requestAnimationFrame(loop);
       };
-      const play = () => { cancelAnimationFrame(raf); clearTimeout(timer); stopConfetti(); setup(); countdown(); running = true; last = performance.now(); raf = requestAnimationFrame(loop); };
+      const play = () => { cancelAnimationFrame(raf); clearTimeout(timer); stopConfetti(); setup(); startIntro(); running = true; last = performance.now(); raf = requestAnimationFrame(loop); };
       // ambient idle animation so the pond looks alive before play
       const idleLoop = now => { if (running) return; for (const k of koi) k.phase += .02; draw(); raf = requestAnimationFrame(idleLoop); };
       // full screen
@@ -1107,6 +1168,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       document.addEventListener('fullscreenchange', onFs); document.addEventListener('webkitfullscreenchange', onFs);
       const onKey = e => { if (e.key === 'Escape' && wrapEl.classList.contains('theatre')) exitFull(); }; document.addEventListener('keydown', onKey);
       $('#kexit').onclick = exitFull;
+      $('#kskip').onclick = () => { if (intro) endIntro(); };
       $('#kstart').onclick = () => { if (!isFull()) enterFull(); play(); };
       $('#khere').onclick = () => play();
       overlay.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (!b) return; if (b.dataset.go === 'full' && (guest ? !(document.fullscreenElement || document.webkitFullscreenElement) : !isFull())) enterFull(); play(); });
@@ -1114,6 +1176,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       const refreshShare = () => { if (guest) return; const L = link(); $('#klink').value = L; $('#kwa').href = 'https://wa.me/?text=' + encodeURIComponent(`Koi pond: ${names.length} names as fish food. Last one floating is the chosen one.\n${L}`); $('#kcmsg').textContent = ''; };
       const newPond = () => {
         running = false; paused = false; cancelAnimationFrame(raf); clearTimeout(timer); stopConfetti();
+        intro = null; $('#kskip').hidden = true; hctx.clearRect(0, 0, W, W);
         names = items(); seed = rand(0x7fffffff) + 1; store.set('koiSeed', seed);
         if (names.length < 2) { overlay.hidden = false; overlay.innerHTML = '<span class="sub">Not enough names</span><span class="headline">Add at least two names</span>'; pellets = []; koi = []; draw(); return; }
         setup(); idle(`Pond #${pondId()} · ${names.length} names`, 'Feeding time'); refreshShare(); raf = requestAnimationFrame(idleLoop);
@@ -1128,7 +1191,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       size();
       if (guest) { wrapEl.classList.add('theatre', 'solo-guest'); document.documentElement.style.overflow = 'hidden'; setTimeout(size, 50); seed = guest.seed; names = guest.names; setup(); idle(); raf = requestAnimationFrame(idleLoop); }
       else { names = items(); const saved = store.get('koiSeed', 0); if (saved && names.length >= 2) { seed = saved; setup(); idle(`Pond #${pondId()} · ${names.length} names`, 'Feeding time'); refreshShare(); raf = requestAnimationFrame(idleLoop); } else newPond(); }
-      return () => { running = true; cancelAnimationFrame(raf); running = false; clearTimeout(timer); stopConfetti(); ro.disconnect(); listeners.delete(onList); document.removeEventListener('fullscreenchange', onFs); document.removeEventListener('webkitfullscreenchange', onFs); document.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; };
+      return () => { intro = null; running = true; cancelAnimationFrame(raf); running = false; clearTimeout(timer); stopConfetti(); ro.disconnect(); listeners.delete(onList); document.removeEventListener('fullscreenchange', onFs); document.removeEventListener('webkitfullscreenchange', onFs); document.removeEventListener('keydown', onKey); document.documentElement.style.overflow = ''; };
     }
   };
 
