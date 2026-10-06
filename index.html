@@ -14,13 +14,13 @@
 <style>
 :root{
   color-scheme:dark;
-  --bg:#1E1E1E; --surface:#2A2A2A; --surface-2:#333333; --field:#1A1A1A; --ink:#D6D6D6; --muted:#8C8C8C; --line:#141414; --hair:#3D3D3D;
-  --accent:#FF9A00; --accent-ink:#111111; --sun:#FF9A00; --pink:#FF5C8A; --teal:#3FB8AF;
+  --bg:#000000; --surface:#000000; --surface-2:#050A05; --field:#000000; --ink:#4FE34F; --muted:#2FA52F; --line:#1A4D1A; --hair:#1A4D1A;
+  --accent:#6C6CFF; --accent-ink:#FFFFFF; --hi:#4FE34F; --sun:#4FE34F; --pink:#E04CE0; --teal:#4CD9D9;
   --shadow:none;
-  --display:"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
-  --body:"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
-  --cond:"IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", sans-serif;
-  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --display:"IBM Plex Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  --body:"IBM Plex Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  --cond:"IBM Plex Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  --mono:"IBM Plex Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
 }
 *{box-sizing:border-box}
 body.guest #tabs, body.guest .tag{display:none}
@@ -295,6 +295,106 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
 @media (orientation:portrait){
   .arena-wrap.kwrap.theatre .arena,.arena-wrap.kwrap:fullscreen .arena{width:min(100%, calc(100vh - 150px))}
 }
+
+/* ---- terminal skin ---- */
+*{border-radius:0!important}
+body{background:#000; color:var(--ink); font:400 13px/1.45 var(--mono); padding-block:10px 28px}
+::selection{background:var(--ink); color:#000}
+header{border-bottom:0; padding-bottom:0}
+h1{font:400 13px/1.4 var(--mono); color:var(--ink)}
+h1::before{content:"[root@localhost ~]# "; color:var(--ink)}
+h1 span{color:var(--accent); font-weight:500}
+h1::after{content:""; display:inline-block; width:.6em; height:1.1em; margin-left:.35em; vertical-align:-.2em; background:var(--ink); animation:blink 1.06s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.tabs{background:transparent; border:0; gap:0 2ch; flex-wrap:wrap}
+.tab{padding:2px 4px; font:500 13px/1.3 var(--mono); color:var(--accent); border:0; background:transparent}
+.tab svg{display:none}
+.tab:hover{background:transparent; color:#9C9CFF; text-decoration:underline}
+.tab[aria-selected="true"]{background:var(--accent); color:#fff}
+.panel{background:transparent; border:1px solid var(--line); padding:10px}
+.eyebrow,.ptabs-label,label.f{font:400 12px/1 var(--mono); text-transform:none; letter-spacing:0; color:var(--muted)}
+.eyebrow::before{content:"# "}
+textarea{background:#000; color:var(--ink); border:1px solid var(--line); font:400 13px/1.5 var(--mono); caret-color:var(--ink)}
+.count{color:var(--muted)}
+.btn{background:transparent; color:var(--ink); border:0; padding:4px 2px; font:500 13px/1.2 var(--mono)}
+.btn::before{content:"["; margin-right:.5ch; color:var(--muted)}
+.btn::after{content:"]"; margin-left:.5ch; color:var(--muted)}
+.btn:hover{background:var(--ink); color:#000; filter:none}
+.btn:hover::before,.btn:hover::after{color:#000}
+.btn.ghost{background:transparent; border:0; color:var(--ink)}
+.btn.big{font-size:14px; padding:4px 6px; background:var(--ink); color:#000}
+.btn.big::before,.btn.big::after{color:#000}
+.btn.wa{background:transparent; color:var(--teal); border:0}
+.btn.small{font-size:12px}
+input[type=number], select{background:#000; color:var(--ink); border:1px solid var(--line); font:400 13px var(--mono)}
+.check input{accent-color:var(--ink)}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible{outline:1px solid var(--ink); outline-offset:1px}
+.result{font:500 clamp(24px,5vw,40px)/1.15 var(--mono); color:var(--ink)}
+.chip{background:transparent; border:1px solid var(--line); font:400 12px var(--mono)}
+.note{color:var(--muted)}
+.pointer{border-top-color:var(--ink)}
+.hub{background:#000; border-color:var(--ink); color:var(--ink); font:500 11px var(--mono)}
+.slip{background:var(--ink); color:#000; font:500 clamp(22px,5vw,36px)/1.1 var(--mono)}
+.slip.empty{background:transparent; color:var(--muted); border:1px dashed var(--line)}
+.team,.order li,.stat{background:transparent; border:1px solid var(--line)}
+.team h3{font:500 13px var(--mono); color:var(--accent)}
+.order li::before{background:transparent; color:var(--accent); font:500 12px var(--mono)}
+.die{background:#000; border:1px solid var(--ink); color:var(--ink)}
+.pips i.on{background:var(--ink)}
+.face{font:500 15px var(--mono); border-color:rgba(0,0,0,.4)}
+.face.h{background:var(--ink); color:#000}
+.face.t{background:var(--accent); color:#fff}
+.hist i.H{background:var(--ink); color:#000}
+.hist i.T{background:var(--accent); color:#fff}
+/* arena */
+.arena{background:#000; border:1px solid var(--line)}
+.arena-wrap.theatre,.arena-wrap:fullscreen,.arena-wrap:-webkit-full-screen{background:#000}
+.arena-wrap.theatre .arena,.arena-wrap:fullscreen .arena{border-color:var(--line)}
+.overlay{background:rgba(0,0,0,.74); gap:10px}
+.overlay .headline{font:500 clamp(20px,4vw,34px)/1.15 var(--mono); color:var(--ink)}
+.overlay .sub{font:400 12px var(--mono); letter-spacing:0; text-transform:none; color:var(--muted)}
+.count-big{font:500 clamp(48px,10vw,110px)/1 var(--mono); color:var(--ink)}
+.rules{display:flex; flex-direction:column; gap:2px; width:auto; max-width:100%}
+.rules li{background:transparent; border:0; padding:0; font:400 12.5px/1.4 var(--mono); color:var(--ink)}
+.rules li::before{content:"> "; color:var(--muted)}
+.rules b{color:var(--accent); font:500 12.5px var(--mono); min-width:4ch}
+.podium li{background:transparent; border:0; border-bottom:1px solid var(--line)}
+.podium .nm{font:500 clamp(16px,3vw,24px)/1.2 var(--mono)}
+.podium .rn,.podium .ko{font:400 11px var(--mono); color:var(--muted); text-transform:lowercase}
+.hud{font:400 11px var(--mono); color:var(--muted); white-space:pre}
+.ticker{font:400 12px var(--mono); color:var(--ink); text-shadow:none}
+.ticker:not(:empty){background:#000; padding:1px 4px; display:inline-block; right:auto}
+.share{background:transparent; border:1px solid var(--line)}
+.share input{background:#000; color:var(--muted); border:1px solid var(--line); font:400 12px var(--mono)}
+.ptabs{gap:0 1ch; flex-wrap:wrap; overflow:visible}
+.ptab{background:transparent; border:0; height:auto; padding:1px 3px; gap:5px; font:500 12.5px var(--mono); color:var(--accent)}
+.ptab i{width:.6em; height:.6em}
+.ptab .st{color:var(--muted); opacity:1; font-weight:400}
+.ptab.out{opacity:.45}
+.ptab[aria-pressed="true"]{background:var(--ink); color:#000; border:0}
+.ptab[aria-pressed="true"] .st{color:#000}
+.arena-wrap.theatre .ptab,.arena-wrap:fullscreen .ptab{background:transparent; color:var(--accent); border:0}
+.arena-wrap.theatre .ptab[aria-pressed="true"],.arena-wrap:fullscreen .ptab[aria-pressed="true"]{background:var(--ink); color:#000}
+.arena-wrap.theatre .exitfs,.arena-wrap:fullscreen .exitfs{background:transparent; color:var(--ink); border:0}
+.fs-side{background:#000; border:1px solid var(--line)}
+.fs-side h3{font:400 12px var(--mono); text-transform:none; letter-spacing:0; color:var(--muted)}
+.fs-side h3 b{color:var(--ink)}
+.fs-list li{background:transparent; font:400 12.5px var(--mono); color:var(--accent)}
+.fs-list li i{width:.6em; height:.6em}
+.fs-list li em{color:var(--muted)}
+.fs-list li.me{background:var(--ink); color:#000}
+.feed li b{color:var(--muted)}
+/* small arenas: keep the intro readable on phones */
+@media (max-width:560px){
+  .overlay{padding:8px; gap:6px; background:rgba(0,0,0,.86)}
+  .overlay .headline{font-size:17px}
+  .overlay .sub{font-size:10.5px}
+  .rules li,.rules b{font-size:11px; line-height:1.3}
+  .count-big{font-size:44px}
+  .btn.big{font-size:12.5px}
+  .battle-arena .rules{display:none}
+}
+@media (prefers-reduced-motion: reduce){ h1::after{animation:none} }
 </style>
 <style>html{color-scheme:light}body{margin:0}img{max-width:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
 </head>
@@ -303,7 +403,6 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
 <div class="wrap">
   <header>
     <h1>Lucky <span>Dip</span></h1>
-    <p class="tag">Nine ways to let chance decide. Put your names in once and every list tool uses them.</p>
   </header>
 
   <nav class="tabs" role="tablist" id="tabs"></nav>
@@ -316,7 +415,6 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
         <span class="count" id="listCount"></span>
         <div class="row" style="gap:6px"><button class="btn ghost small" id="resetList" type="button">Reset to crew</button><button class="btn ghost small" id="clearList" type="button">Clear</button></div>
       </div>
-      <p class="note">One name or option per line. Duplicates count twice.</p>
     </aside>
 
     <main class="panel tool" id="tool"></main>
@@ -356,8 +454,9 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
   updateCount();
 
   const icon = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
-  const SEG = ['#6A86E8', '#E6B43C', '#E0708A', '#4DB8AE', '#E8894A', '#A085E0'];
-  const SEG_INK = ['#111111', '#111111', '#111111', '#111111', '#111111', '#111111'];
+  const bar = (n, total, w = 14) => { const f = Math.round(Math.max(0, Math.min(1, n / Math.max(1, total))) * w); return '[' + '='.repeat(f) + ' '.repeat(w - f) + '] ' + Math.round(n / Math.max(1, total) * 100) + '%'; };
+  const SEG = ['#4FE34F', '#6C6CFF', '#4CD9D9', '#E0E04C', '#E04CE0', '#E05A4C'];
+  const SEG_INK = ['#000000', '#FFFFFF', '#000000', '#000000', '#000000', '#000000'];
 
   // ---------- tools ----------
   const tools = {};
@@ -368,7 +467,6 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
     icon: icon('<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/>'),
     mount(el){
       el.innerHTML = `
-        <div><p class="eyebrow">Spin the wheel</p><h2>Round and round it goes</h2></div>
         <div class="center">
           <div class="wheel-box"><div class="pointer"></div><canvas id="wc" aria-label="Spinning wheel"></canvas><button class="hub" id="hub" type="button" aria-label="Spin">SPIN</button></div>
           <p class="result" id="wr" aria-live="polite">&nbsp;</p>
@@ -395,7 +493,7 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
           ctx.save(); ctx.rotate(i * seg + seg / 2);
           ctx.fillStyle = names.length ? SEG_INK[ci] : '#fff'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
           const fs = Math.max(10, Math.min(22, r * 0.9 * seg * 0.55, r / 9));
-          ctx.font = `700 ${fs}px "IBM Plex Sans", system-ui, sans-serif`;
+          ctx.font = `700 ${fs}px "IBM Plex Mono", ui-monospace, monospace`;
           let t = label; const maxW = r * 0.68;
           while (ctx.measureText(t).width > maxW && t.length > 2) t = t.slice(0, -2) + '…';
           ctx.fillText(t, r - 18, 0); ctx.restore();
@@ -450,27 +548,25 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
     mount(el, opts = {}){
       const guest = opts.fight || null;
       el.innerHTML = `
-        <div><p class="eyebrow">Last ship flying</p><h2>Space battle</h2><p class="lede">${guest ? `${guest.names.length} pilots, three lives each, three rounds. Each round's winner sits out the next, and the three winners are revealed at the end. Everyone with this link watches exactly the same battle.` : 'Every name gets a ship with three lives. They steer and fire at random, asteroids get in the way, and the last one flying wins the round. There are three rounds, and each winner sits out the rounds after, so you end up with three different winners. Share it and everyone who opens the link watches the identical battle.'}</p></div>
-        <div class="row">
-          <button class="btn" id="bstart" type="button">Watch in full screen</button>
-          <button class="btn ghost" id="bhere" type="button">Watch here</button>
+        <div class="row"${guest ? ' hidden' : ''}>
+          <button class="btn" id="bstart" type="button" hidden>Watch in full screen</button>
+          <button class="btn ghost" id="bhere" type="button" hidden>Watch here</button>
           ${guest ? '' : '<button class="btn ghost" id="bnew" type="button">New battle</button>'}
           ${guest ? '' : '<label class="f" for="bspeed" style="flex-direction:row; align-items:center; gap:8px">Speed<select id="bspeed" style="width:auto">' + SPEEDS.map(v => `<option value="${v}">${v}×</option>`).join('') + '</select></label>'}
         </div>
         <div class="arena-wrap" id="awrap">
-          <div class="arena" id="arena"><canvas id="bc" aria-label="Space battle arena"></canvas><div class="hud" id="hud"></div><div class="ticker" id="ticker" aria-live="polite"></div><div class="overlay" id="bo"></div><canvas class="confetti" id="conf" aria-hidden="true"></canvas></div>
+          <div class="arena battle-arena" id="arena"><canvas id="bc" aria-label="Space battle arena"></canvas><div class="hud" id="hud"></div><div class="ticker" id="ticker" aria-live="polite"></div><div class="overlay" id="bo"></div><canvas class="confetti" id="conf" aria-hidden="true"></canvas></div>
           <aside class="fs-side" aria-label="Still flying"><h3>Still flying <b id="fscount"></b></h3><ol class="fs-list" id="fsalive"></ol><h3 id="fswh">Round winners</h3><ol class="fs-list" id="fswin"></ol></aside>
-          <p class="ptabs-label">Tap your name to follow your ship</p>
           <div class="ptabs" id="ptabs" aria-label="Follow a player"></div>
           <button class="btn ghost small exitfs" id="bexit" type="button">Exit full screen</button>
           <p class="turn-hint">Turn your phone sideways for a bigger view</p>
         </div>
         ${guest ? '' : `<div class="share">
-          <div><p class="eyebrow">Share this battle</p><p class="note" style="margin-top:6px">Send the link once. Everyone who opens it sees the same ships, the same shots and the same three winners, at the speed you pick here. Speed only changes the pace, never the result.</p></div>
+          <p class="eyebrow">Share this battle</p>
           <input id="blink" readonly aria-label="Battle link">
           <div class="row"><a class="btn wa" id="bwa" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn ghost" id="bcopy" type="button">Copy link</button><span class="note" id="bcmsg" aria-live="polite"></span></div>
         </div>`}
-        <div class="bgrid">
+        <div class="bgrid" hidden>
           <div><p class="eyebrow" style="margin-bottom:8px">Still flying</p><div class="chips" id="alive"></div></div>
           <div><p class="eyebrow" style="margin-bottom:8px" id="kohead">Knockouts</p><ol class="feed" id="feed"></ol></div>
           <div><p class="eyebrow" style="margin-bottom:8px">Round winners</p><ol class="feed" id="rwin"></ol></div>
@@ -655,7 +751,7 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
       const stopConfetti = () => { confTimers.forEach(clearTimeout); confTimers = []; cancelAnimationFrame(confRaf); confRaf = 0; conf = []; cctx.clearRect(0, 0, cc.width, cc.height); };
       $('#ptabs').addEventListener('click', e => { const b = e.target.closest('.ptab'); if (!b) return; focus = focus === b.dataset.p ? '' : b.dataset.p; store.set('battleFocus', focus); renderSide(); if (!running) draw(); });
       const draw = () => {
-        ctx.fillStyle = '#111111'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, W, H);
         ctx.save(); if (shake > .3) ctx.translate((V() - .5) * shake, (V() - .5) * shake);
         for (const s of stars) { ctx.globalAlpha = s.a; ctx.fillStyle = '#fff'; ctx.fillRect(s.x, s.y, s.s, s.s); }
         ctx.globalAlpha = 1; ctx.lineWidth = 2; ctx.strokeStyle = '#8990AE';
@@ -668,7 +764,7 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
         for (const g of rings) { const k = 1 - g.life / g.full; ctx.globalAlpha = Math.max(0, g.life / g.full); ctx.strokeStyle = g.color; ctx.lineWidth = g.w * (1 - k * .6); ctx.beginPath(); ctx.arc(g.x, g.y, g.r + (g.max - g.r) * (1 - Math.pow(1 - k, 3)), 0, TAU); ctx.stroke(); }
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = 1;
-        ctx.font = `700 ${Math.max(15, 12 / scale)}px "IBM Plex Sans", system-ui, sans-serif`; ctx.textAlign = 'center';
+        ctx.font = `500 ${Math.max(15, 12 / scale)}px "IBM Plex Mono", ui-monospace, monospace`; ctx.textAlign = 'center';
         ctx.globalAlpha = 1;
         for (const s of ships) {
           if (!s.alive) continue;
@@ -684,10 +780,10 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
           for (let k = 0; k < 3; k++) { ctx.fillStyle = k < s.hp ? s.color : '#333851'; ctx.fillRect(s.x - 13 + k * 9, s.y + 20, 7, 4); }
         }
         ctx.textAlign = 'center';
-        for (const f of floaters) { const k = f.life / f.full; ctx.globalAlpha = Math.min(1, k * 2); ctx.font = `600 ${Math.max(f.big ? 26 : 17, (f.big ? 20 : 13) / scale)}px "IBM Plex Sans", system-ui, sans-serif`; ctx.fillStyle = f.color; ctx.fillText(f.txt, f.x, f.y - (1 - k) * 26); }
+        for (const f of floaters) { const k = f.life / f.full; ctx.globalAlpha = Math.min(1, k * 2); ctx.font = `600 ${Math.max(f.big ? 26 : 17, (f.big ? 20 : 13) / scale)}px "IBM Plex Mono", ui-monospace, monospace`; ctx.fillStyle = f.color; ctx.fillText(f.txt, f.x, f.y - (1 - k) * 26); }
         ctx.globalAlpha = 1; ctx.restore();
         if (flashA > .01) { ctx.fillStyle = `rgba(255,255,255,${flashA})`; ctx.fillRect(0, 0, W, H); }
-        hud.textContent = `Battle #${battleId()}` + (running && !over ? ` · Round ${round + 1} of ${totalRounds()} · ${ships.filter(s => s.alive).length} left · ${Math.floor(t)}s${t > 25 ? ' · firing faster' : ''}` : '');
+        hud.textContent = `battle #${battleId().toLowerCase()}` + (running && !over ? ` ${bar(ships.length - ships.filter(s => s.alive).length, ships.length - 1)} round ${round + 1}/${totalRounds()} · ${ships.filter(s => s.alive).length} left · ${Math.floor(t)}s${t > 25 ? ' · firing faster' : ''}` : '');
       };
       const loop = now => {
         const real = Math.min(.1, (now - last) / 1000); last = now;
@@ -756,26 +852,24 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
     mount(el, opts = {}){
       const guest = opts.fight || null;
       el.innerHTML = `
-        <div><p class="eyebrow">Feeding time</p><h2>Koi pond</h2><p class="lede">${guest ? `${guest.names.length} names floating as fish food. The koi eat them one by one, and the last name left is the chosen one. Everyone with this link watches the same pond.` : 'Every name floats on the pond as a pellet of fish food. The koi eat them one by one, and the last name left floating is the chosen one. Share it and everyone who opens the link watches the same feeding.'}</p></div>
-        <div class="row">
-          <button class="btn" id="kstart" type="button">Watch in full screen</button>
-          <button class="btn ghost" id="khere" type="button">Watch here</button>
+        <div class="row"${guest ? ' hidden' : ''}>
+          <button class="btn" id="kstart" type="button" hidden>Watch in full screen</button>
+          <button class="btn ghost" id="khere" type="button" hidden>Watch here</button>
           ${guest ? '' : '<button class="btn ghost" id="knew" type="button">New pond</button>'}
           ${guest ? '' : '<label class="f" for="kspeed" style="flex-direction:row; align-items:center; gap:8px">Speed<select id="kspeed" style="width:auto">' + SPEEDS.map(v => `<option value="${v}">${v}×</option>`).join('') + '</select></label>'}
         </div>
         <div class="arena-wrap kwrap" id="kwrap">
           <div class="arena pond" id="kpond"><canvas id="klo" class="lofi" aria-label="Koi pond"></canvas><canvas id="khi" aria-hidden="true"></canvas><div class="hud" id="khud"></div><div class="ticker" id="kticker" aria-live="polite"></div><div class="overlay" id="ko"></div><canvas class="confetti" id="kconf" aria-hidden="true"></canvas></div>
           <aside class="fs-side" aria-label="Still floating"><h3>Still floating <b id="kfscount"></b></h3><ol class="fs-list" id="kfsalive"></ol></aside>
-          <p class="ptabs-label">Tap your name to follow it</p>
           <div class="ptabs" id="kptabs" aria-label="Follow a name"></div>
           <button class="btn ghost small exitfs" id="kexit" type="button">Exit full screen</button>
         </div>
         ${guest ? '' : `<div class="share">
-          <div><p class="eyebrow">Share this pond</p><p class="note" style="margin-top:6px">Send the link once. Everyone who opens it sees the same koi, the same order of eating and the same chosen one, at the speed you pick here.</p></div>
+          <p class="eyebrow">Share this pond</p>
           <input id="klink" readonly aria-label="Pond link">
           <div class="row"><a class="btn wa" id="kwa" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn ghost" id="kcopy" type="button">Copy link</button><span class="note" id="kcmsg" aria-live="polite"></span></div>
         </div>`}
-        <div class="bgrid">
+        <div class="bgrid" hidden>
           <div><p class="eyebrow" style="margin-bottom:8px">Still floating</p><div class="chips" id="kalive"></div></div>
           <div><p class="eyebrow" style="margin-bottom:8px">Eaten</p><ol class="feed" id="kfeed"></ol></div>
         </div>`;
@@ -911,7 +1005,7 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
       };
       const draw = () => {
         const now = performance.now(), c = lctx;
-        c.fillStyle = '#1E1E1E'; c.fillRect(0, 0, W, W);
+        c.fillStyle = '#000000'; c.fillRect(0, 0, W, W);
         // stone rim
         for (const st of stones) { const r = POND + 10; c.fillStyle = st.tone < .33 ? '#4A4A46' : st.tone < .66 ? '#5B5A54' : '#3C3C39'; c.beginPath(); c.arc(CX + Math.cos(st.a) * r, CY + Math.sin(st.a) * r, st.r, 0, TAU); c.fill(); }
         // water
@@ -941,7 +1035,7 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
           h.lineWidth = 3 / sc; h.strokeStyle = 'rgba(10,20,20,.85)'; h.strokeText(label, p.x, p.y - 14);
           h.fillStyle = me ? '#FF9A00' : p === winner ? '#F2C86A' : '#E8E4DA'; h.fillText(label, p.x, p.y - 14);
         }
-        hud.textContent = `Pond #${pondId()}` + (running && !over ? ` · ${pellets.filter(p => p.alive).length} left · ${Math.floor(t)}s` : '');
+        hud.textContent = `pond #${pondId().toLowerCase()}` + (running && !over ? ` ${bar(pellets.length - pellets.filter(p => p.alive).length, pellets.length - 1)} ${pellets.filter(p => p.alive).length} left · ${Math.floor(t)}s` : '');
       };
       const renderSide = () => {
         const alive = pellets.filter(p => p.alive);
@@ -1040,7 +1134,6 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
     mount(el){
       let drawn = [];
       el.innerHTML = `
-        <div><p class="eyebrow">Draw names</p><h2>Pull one out, it stays out</h2><p class="lede">Each draw removes that name from the hat until you put them all back.</p></div>
         <div class="center">
           <div class="slip empty" id="slip" aria-live="polite">The hat is ready</div>
           <div class="row" style="justify-content:center">
@@ -1078,7 +1171,6 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
     icon: icon('<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2.5 19a5.5 5.5 0 0 1 11 0M10.5 19a5.5 5.5 0 0 1 11 0"/>'),
     mount(el){
       el.innerHTML = `
-        <div><p class="eyebrow">Split into teams</p><h2>Fair sides, no arguments</h2><p class="lede">Shuffles everyone and deals them out so team sizes differ by one at most.</p></div>
         <div class="row">
           <label class="f" for="tn">Teams<input type="number" id="tn" min="2" max="20" value="${store.get('teams', 3)}"></label>
           <button class="btn" id="make" type="button">Make teams</button>
@@ -1101,7 +1193,6 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
     icon: icon('<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>'),
     mount(el){
       el.innerHTML = `
-        <div><p class="eyebrow">Shuffle the order</p><h2>Who goes first?</h2><p class="lede">For stand-ups, presentations, crit sessions or turns at anything.</p></div>
         <div class="row"><button class="btn" id="shuf" type="button">Shuffle</button><button class="btn ghost" id="copy" type="button">Copy list</button><span class="note" id="cmsg" aria-live="polite"></span></div>
         <div class="center"><ol class="order" id="ol"></ol></div>`;
       const ol = el.querySelector('#ol'); let cur = [];
@@ -1122,7 +1213,6 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
     mount(el){
       const s = store.get('dice', {n: 2, sides: 6});
       el.innerHTML = `
-        <div><p class="eyebrow">Roll dice</p><h2>Roll the bones</h2></div>
         <div class="row">
           <label class="f" for="dn">How many<input type="number" id="dn" min="1" max="10" value="${s.n}"></label>
           <label class="f" for="ds">Sides<select id="ds">${[4, 6, 8, 10, 12, 20, 100].map(x => `<option value="${x}" ${x == s.sides ? 'selected' : ''}>d${x}</option>`).join('')}</select></label>
@@ -1159,7 +1249,6 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
     mount(el){
       let h = 0, t = 0, hist = [], turns = 0, busy = false;
       el.innerHTML = `
-        <div><p class="eyebrow">Flip a coin</p><h2>Heads or tails</h2></div>
         <div class="center">
           <div class="coin-scene"><div class="coin" id="coin"><div class="face h">HEADS</div><div class="face t">TAILS</div></div></div>
           <p class="result" id="cr" aria-live="polite" style="font-size:36px">&nbsp;</p>
@@ -1193,7 +1282,6 @@ input[type=number], select{border-radius:2px; background:var(--field); border-co
     mount(el){
       const s = store.get('num', {min: 1, max: 100, count: 1, unique: true});
       el.innerHTML = `
-        <div><p class="eyebrow">Random number</p><h2>Pick a number, any number</h2><p class="lede">Raffle tickets, bingo calls, or which page to open the book on.</p></div>
         <div class="row">
           <label class="f" for="nmin">From<input type="number" id="nmin" value="${s.min}"></label>
           <label class="f" for="nmax">To<input type="number" id="nmax" value="${s.max}"></label>
