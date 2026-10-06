@@ -56,14 +56,14 @@ Everything is in `index.html`, inside `tools.koi`:
 
 ## Fish introductions
 
-After Play is pressed, and before the countdown, each koi gets a short turn on stage (2.3 seconds each):
+After Play is pressed, and before the countdown, each koi gets a 2.6-second turn on a retro character-select screen:
 
-- It swims in from the left, does a weird little move, and swims off to the right. The moves are: chasing its tail, a zigzag, hops, a figure of eight, a shiver, and losing the plot.
-- It has big googly eyes, a gulping mouth and rising bubbles.
-- Its name ("the kohaku") appears above it, and a strange fact about it is typed out below like a terminal, for example "is legally three fish".
+- The fish is a simple low-poly 3D model (a tapered body with tail, dorsal and side fins, eyes and the fish's own colour pattern). It is rendered at 72 × 72 pixels with three flat shading tones, then scaled up with hard pixel edges.
+- It pops in and rotates on a turntable above a green perspective grid.
+- Its name ("the kohaku") sits above it, and a strange fact is typed out below like a terminal, for example "is legally three fish".
 - **Skip intro** jumps straight to the countdown.
 
-Which move and fact each fish gets comes from the pond's seed, so everyone with the same link sees the same intro. The intro is visual only and doesn't change who gets eaten. Code: `startIntro()`, `drawIntro()`, `endIntro()`, `MOVES`, `TRAITS`.
+The fact each fish gets comes from the pond's seed, so everyone with the same link sees the same intro. The intro is visual only and doesn't change who gets eaten. Code: `buildModel()`, `renderModel()`, `startIntro()`, `drawIntro()`, `endIntro()`, `TRAITS`.
 
 ## Shared links
 
