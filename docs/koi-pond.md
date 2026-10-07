@@ -56,7 +56,7 @@ Everything is in `index.html`, inside `tools.koi`:
 
 ## Opening screen
 
-Before play, the pond shows a title screen: the word KOI in big low-poly 3D letters (white K, red eight-sided O, gold I), rendered at 120 × 120 pixels and scaled up, swaying gently above a green perspective grid. Underneath it says how many names and koi there are, with a blinking "press play". Code: `TITLE`, `prism()`, `drawTitle()`.
+Before play, the pond shows a title screen: the word KOI in big low-poly 3D letters (white K, red eight-sided O, gold I), rendered at 120 × 120 pixels and scaled up, swaying gently above a green perspective grid. Underneath it says how many names and koi there are, with a big retro `▶ PLAY` button (green outline with a gently pulsing glow, fills green on hover). Shared links show only this button. Code: `TITLE`, `prism()`, `drawTitle()`.
 
 ## Fish introductions
 

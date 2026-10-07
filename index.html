@@ -403,6 +403,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @media (prefers-reduced-motion: reduce){ h1::after{animation:none} }
 
 /* koi pond: tall screen, UI below */
+.kwrap .overlay .title-play{position:absolute; left:50%; top:61%; transform:translateX(-50%); pointer-events:auto; cursor:pointer; background:#09060D; color:#4FE34F; border:3px solid #4FE34F; padding:12px 28px; font:500 clamp(16px,4.5vw,22px)/1 var(--mono); letter-spacing:.12em; box-shadow:0 0 0 3px #09060D, 0 0 18px rgba(79,227,79,.35); animation:pulse 1.6s steps(2) infinite}
+.kwrap .overlay .title-play:hover,.kwrap .overlay .title-play:focus-visible{background:#4FE34F; color:#09060D; animation:none; outline:none}
+.kwrap .overlay .title-play:active{transform:translateX(-50%) translateY(2px)}
+@keyframes pulse{50%{box-shadow:0 0 0 3px #09060D, 0 0 4px rgba(79,227,79,.15)}}
+@media (prefers-reduced-motion: reduce){ .kwrap .overlay .title-play{animation:none} }
 .pond{aspect-ratio:9/16}
 .kwrap .arena{width:min(100%, 380px)}
 .kbar,.krules,.kwrap .ptabs{width:min(100%, 380px); align-self:center}
@@ -1070,7 +1075,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       };
       const RULES = () => `<li>every name floats as fish food</li><li>${koi.length} koi eat them one at a time</li><li>the last name left floating is the chosen one</li>`;
       const act = html => { $('#kact').innerHTML = html; };
-      const idle = (sub, big) => { overlay.hidden = true; $('#krules').innerHTML = guest ? '' : RULES(); act(guest ? '<button class="btn play" data-go="full" type="button">▶ play</button>' : '<button class="btn play" data-go="full" type="button">▶ full screen</button><button class="btn" data-go="here" type="button">play here</button>'); return; overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span>${RULES()}<div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`; };
+      const idle = (sub, big) => { overlay.hidden = false; overlay.innerHTML = '<button class="title-play" data-go="full" type="button">▶ PLAY</button>'; $('#krules').innerHTML = guest ? '' : RULES(); act(guest ? '' : '<button class="btn" data-go="here" type="button">play here (no full screen)</button>'); return; overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span>${RULES()}<div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`; };
       const countdown = () => {
         let n = 3; paused = true; clearTimeout(timer);
         act(''); $('#krules').innerHTML = RULES();
@@ -1188,7 +1193,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         const h = hctx; h.clearRect(0, 0, W, H); h.textAlign = 'center'; h.textBaseline = 'alphabetic';
         h.font = '400 22px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#2FA52F';
         h.fillText(`${names.length} names · ${koi.length} koi · 1 chosen one`, CX, CY + 40);
-        if (Math.floor(now / 600) % 2) { h.fillStyle = '#4FE34F'; h.fillText('press play', CX, CY + 90); }
         hud.textContent = '';
       };
       const drawIntro = (now, real) => {
