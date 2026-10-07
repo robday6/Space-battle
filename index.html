@@ -366,7 +366,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .rules b{color:var(--accent); font:500 12.5px var(--mono); min-width:4ch}
 .podium li{background:transparent; border:0; border-bottom:1px solid var(--line)}
 .podium .nm{font:500 clamp(16px,3vw,24px)/1.2 var(--mono)}
-.podium .rn,.podium .ko{font:400 11px var(--mono); color:var(--muted); text-transform:lowercase}
+.podium .rn,.podium .ko{font:400 11px var(--mono); color:var(--muted); text-transform:none}
 .hud{font:400 11px var(--mono); color:var(--muted); white-space:pre}
 .ticker{font:400 12px var(--mono); color:var(--ink); text-shadow:none}
 .ticker:not(:empty){background:#000; padding:1px 4px; display:inline-block; right:auto}
@@ -403,7 +403,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 @media (prefers-reduced-motion: reduce){ h1::after{animation:none} }
 
 /* koi pond: tall screen, UI below */
-.kwrap .overlay .title-play{position:absolute; left:50%; top:61%; transform:translateX(-50%); pointer-events:auto; cursor:pointer; background:#09060D; color:#4FE34F; border:3px solid #4FE34F; padding:12px 28px; font:500 clamp(16px,4.5vw,22px)/1 var(--mono); letter-spacing:.12em; box-shadow:0 0 0 3px #09060D, 0 0 18px rgba(79,227,79,.35); animation:pulse 1.6s steps(2) infinite}
+.kwrap .overlay .title-play{position:absolute; left:50%; top:61%; transform:translateX(-50%); pointer-events:auto; cursor:pointer; background:#09060D; color:#4FE34F; border:3px solid #4FE34F; padding:12px 28px; font:500 clamp(16px,4.5vw,22px)/1 var(--mono); letter-spacing:.06em; box-shadow:0 0 0 3px #09060D, 0 0 18px rgba(79,227,79,.35); animation:pulse 1.6s steps(2) infinite}
 .kwrap .overlay .title-play:hover,.kwrap .overlay .title-play:focus-visible{background:#4FE34F; color:#09060D; animation:none; outline:none}
 .kwrap .overlay .title-play:active{transform:translateX(-50%) translateY(2px)}
 @keyframes pulse{50%{box-shadow:0 0 0 3px #09060D, 0 0 4px rgba(79,227,79,.15)}}
@@ -814,7 +814,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         for (const f of floaters) { const k = f.life / f.full; ctx.globalAlpha = Math.min(1, k * 2); ctx.font = `600 ${Math.max(f.big ? 26 : 17, (f.big ? 20 : 13) / scale)}px "IBM Plex Mono", ui-monospace, monospace`; ctx.fillStyle = f.color; ctx.fillText(f.txt, f.x, f.y - (1 - k) * 26); }
         ctx.globalAlpha = 1; ctx.restore();
         if (flashA > .01) { ctx.fillStyle = `rgba(255,255,255,${flashA})`; ctx.fillRect(0, 0, W, H); }
-        hud.textContent = `battle #${battleId().toLowerCase()}` + (running && !over ? ` ${bar(ships.length - ships.filter(s => s.alive).length, ships.length - 1)} round ${round + 1}/${totalRounds()} · ${ships.filter(s => s.alive).length} left · ${Math.floor(t)}s${t > 25 ? ' · firing faster' : ''}` : '');
+        hud.textContent = `Battle #${battleId()}` + (running && !over ? ` ${bar(ships.length - ships.filter(s => s.alive).length, ships.length - 1)} · Round ${round + 1}/${totalRounds()} · ${ships.filter(s => s.alive).length} left · ${Math.floor(t)}s${t > 25 ? ' · firing faster' : ''}` : '');
       };
       const loop = now => {
         const real = Math.max(0, Math.min(.1, (now - last) / 1000)); last = now;
@@ -891,7 +891,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         </div>
         <div class="arena-wrap kwrap" id="kwrap">
           <div class="arena pond" id="kpond"><canvas id="klo" class="lofi" aria-label="Koi pond"></canvas><canvas id="khi" aria-hidden="true"></canvas><div class="overlay" id="ko"></div><canvas class="confetti" id="kconf" aria-hidden="true"></canvas></div>
-          <div class="kbar"><div class="kstat"><div class="hud" id="khud"></div><div class="ticker" id="kticker" aria-live="polite"></div></div><div class="kact"><span id="kact" class="kact"></span><button class="btn small kskip" id="kskip" type="button" hidden>skip intro</button></div></div>
+          <div class="kbar"><div class="kstat"><div class="hud" id="khud"></div><div class="ticker" id="kticker" aria-live="polite"></div></div><div class="kact"><span id="kact" class="kact"></span><button class="btn small kskip" id="kskip" type="button" hidden>Skip intro</button></div></div>
           <ul class="krules" id="krules"></ul>
           <aside class="fs-side" aria-label="Still floating"><h3>Still floating <b id="kfscount"></b></h3><ol class="fs-list" id="kfsalive"></ol></aside>
           <div class="ptabs" id="kptabs" aria-label="Follow a name"></div>
@@ -1060,7 +1060,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           const label = me ? `${p.name} (you)` : p.name;
           h.globalAlpha = me || p === winner ? 1 : .55; h.fillStyle = me ? '#FF9A00' : p === winner ? '#F2D36A' : '#B9CCD4'; h.fillText(label, p.x + 12, p.y); h.globalAlpha = 1;
         }
-        hud.textContent = guest && !running ? '' : `pond #${pondId().toLowerCase()}` + (running && !over ? ` ${bar(pellets.length - pellets.filter(p => p.alive).length, pellets.length - 1)} ${pellets.filter(p => p.alive).length} left · ${Math.floor(t)}s` : '');
+        hud.textContent = guest && !running ? '' : `Pond #${pondId()}` + (running && !over ? ` ${bar(pellets.length - pellets.filter(p => p.alive).length, pellets.length - 1)} ${pellets.filter(p => p.alive).length} left · ${Math.floor(t)}s` : '');
       };
       const renderSide = () => {
         const alive = pellets.filter(p => p.alive);
@@ -1073,9 +1073,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           return `<button class="ptab${e ? ' out' : ''}" type="button" data-p="${esc(n)}" aria-pressed="${focus === n}"><i style="background:${e ? '#555' : '#C9A46C'}"></i>${esc(n)}<span class="st">${e ? `Eaten #${e.place}` : p === winner ? 'Chosen' : 'Floating'}</span></button>`; }).join('');
         tabs.scrollLeft = keep;
       };
-      const RULES = () => `<li>every name floats as fish food</li><li>${koi.length} koi eat them one at a time</li><li>the last name left floating is the chosen one</li>`;
+      const RULES = () => `<li>Every name floats as fish food</li><li>${koi.length} koi eat them one at a time</li><li>The last name left floating is the chosen one</li>`;
       const act = html => { $('#kact').innerHTML = html; };
-      const idle = (sub, big) => { overlay.hidden = false; overlay.innerHTML = '<button class="title-play" data-go="full" type="button">▶ PLAY</button>'; $('#krules').innerHTML = guest ? '' : RULES(); act(guest ? '' : '<button class="btn" data-go="here" type="button">play here (no full screen)</button>'); return; overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span>${RULES()}<div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`; };
+      const idle = (sub, big) => { overlay.hidden = false; overlay.innerHTML = '<button class="title-play" data-go="full" type="button">▶ Play</button>'; $('#krules').innerHTML = guest ? '' : RULES(); act(guest ? '' : '<button class="btn" data-go="here" type="button">Play here (no full screen)</button>'); return; overlay.innerHTML = `<span class="sub">${sub}</span><span class="headline">${big}</span>${RULES()}<div class="row" style="justify-content:center"><button class="btn big" data-go="full" type="button">▶ Watch in full screen</button><button class="btn ghost" data-go="here" type="button">Watch here</button></div>`; };
       const countdown = () => {
         let n = 3; paused = true; clearTimeout(timer);
         act(''); $('#krules').innerHTML = RULES();
@@ -1087,8 +1087,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         timer = setTimeout(() => {
           overlay.hidden = false;
           overlay.innerHTML = `<span class="headline">${esc(p.name)}${p.name === focus ? ' (you!)' : ''}</span>`;
-          ticker.textContent = `the chosen one: ${p.name} · last one floating after ${Math.round(t)}s`;
-          act('<button class="btn" data-go="here" type="button">watch again</button>');
+          ticker.textContent = `The chosen one: ${p.name} · last one floating after ${Math.round(t)}s`;
+          act('<button class="btn" data-go="here" type="button">Watch again</button>');
           confetti(['#F2C86A', '#EFE8DA', '#D9472B', '#E79AAE'], 220);
         }, 1400);
         confTimers.push(setTimeout(() => { if (over) running = false; }, 9000));
@@ -1210,9 +1210,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         }
         // name card, typed out like a terminal
         const h = hctx; h.clearRect(0, 0, W, H); h.textBaseline = 'alphabetic';
-        const title = fi.k.type.label.toLowerCase(), n = Math.max(0, Math.floor((u - .15) * 80)), typed = fi.trait.slice(0, n);
+        const title = fi.k.type.label, n = Math.max(0, Math.floor((u - .15) * 80)), typed = (fi.trait[0].toUpperCase() + fi.trait.slice(1)).slice(0, n);
         h.globalAlpha = Math.min(1, u * 8, (1 - u) * 8); h.textAlign = 'center';
-        h.font = '400 20px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#2FA52F'; h.fillText(`fish ${i + 1}/${intro.fish.length}`, CX, CY - 300);
+        h.font = '400 20px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#2FA52F'; h.fillText(`Fish ${i + 1}/${intro.fish.length}`, CX, CY - 300);
         h.font = '500 50px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#4FE34F'; h.fillText(title, CX, CY - 240);
         h.font = '400 24px "IBM Plex Mono", ui-monospace, monospace';
         h.fillText('> ' + typed + (Math.floor(now / 530) % 2 ? '█' : ' '), CX, CY + 330);
