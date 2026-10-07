@@ -959,7 +959,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         for (const o of koi) if (o.target === p) o.target = null;
         eaten.push({name: p.name, by: k.type.label, place: left + 1});
         ripples.push({x: p.x, y: p.y, r: 4, life: 1.2, full: 1.2}, {x: p.x, y: p.y, r: 2, life: .8, full: .8});
-        ticker.textContent = (p.name === focus ? "That's you! " : '') + `#${left + 1} ${p.name} was eaten by the ${k.type.label}`;
+        ticker.textContent = (p.name === focus ? "That's you! " : '') + `#${left + 1} ${p.name} was eaten by ${k.type.label}`;
         renderSide();
         if (left === 1) finish(pellets.find(q => q.alive));
       };
@@ -1060,7 +1060,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       const renderSide = () => {
         const alive = pellets.filter(p => p.alive);
         $('#kalive').innerHTML = alive.map(p => `<span class="chip">${esc(p.name)}</span>`).join('') || '<span class="note">Nobody.</span>';
-        $('#kfeed').innerHTML = eaten.length ? eaten.slice().reverse().map(o => `<li><b>#${o.place}</b><span>${esc(o.name)} · eaten by the ${o.by}</span></li>`).join('') : '<li class="note">Nobody eaten yet.</li>';
+        $('#kfeed').innerHTML = eaten.length ? eaten.slice().reverse().map(o => `<li><b>#${o.place}</b><span>${esc(o.name)} · eaten by ${o.by}</span></li>`).join('') : '<li class="note">Nobody eaten yet.</li>';
         $('#kfscount').textContent = alive.length;
         $('#kfsalive').innerHTML = alive.map(p => `<li class="${p.name === focus ? 'me' : ''}"><i style="background:#C9A46C"></i><span>${esc(p.name)}${p.name === focus ? ' (you)' : ''}</span><em></em></li>`).join('');
         const tabs = $('#kptabs'), keep = tabs.scrollLeft;
@@ -1170,7 +1170,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         }
         // name card, typed out like a terminal
         const h = hctx; h.clearRect(0, 0, W, H); h.textBaseline = 'alphabetic';
-        const title = `the ${fi.k.type.label.toLowerCase()}`, n = Math.max(0, Math.floor((u - .15) * 80)), typed = fi.trait.slice(0, n);
+        const title = fi.k.type.label.toLowerCase(), n = Math.max(0, Math.floor((u - .15) * 80)), typed = fi.trait.slice(0, n);
         h.globalAlpha = Math.min(1, u * 8, (1 - u) * 8); h.textAlign = 'center';
         h.font = '400 20px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#2FA52F'; h.fillText(`fish ${i + 1}/${intro.fish.length}`, CX, CY - 300);
         h.font = '500 50px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#4FE34F'; h.fillText(title, CX, CY - 240);

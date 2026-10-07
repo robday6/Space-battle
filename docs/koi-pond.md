@@ -21,7 +21,7 @@ Anyone who opens the link gets the same watch-only page as Space battle: just th
 - When a koi is ready to eat, it picks two random pellets, heads for the nearer one, and eats it on arrival. After eating, it rests for 4.5 to 10.5 seconds. Rests are 50% longer once 3 or fewer pellets are left, to build tension.
 - Pellets drift slowly, and get nudged aside by passing fish.
 - When only one pellet is left, it glows gold and the chosen one is announced, with confetti.
-- The ticker and the Eaten list record who was eaten, by which koi, and in what order.
+- The ticker and the Eaten list record who was eaten, by which koi (for example "eaten by Kohaku"), and in what order.
 - 13 names usually takes about half a minute at 1×.
 
 ## Following your name
@@ -60,7 +60,7 @@ After Play is pressed, and before the countdown, each koi gets a 2.6-second turn
 
 - The fish is a simple low-poly 3D model (a tapered body with tail, dorsal and side fins, eyes and the fish's own colour pattern). It is rendered at 72 × 72 pixels with three flat shading tones, then scaled up with hard pixel edges.
 - It pops in and rotates on a turntable above a green perspective grid.
-- Its name ("the kohaku") sits above it, and a strange fact is typed out below like a terminal, for example "is legally three fish".
+- Its name ("kohaku") sits above it, and a strange fact is typed out below like a terminal, for example "is legally three fish".
 - **Skip intro** jumps straight to the countdown.
 
 The fact each fish gets comes from the pond's seed, so everyone with the same link sees the same intro. The intro is visual only and doesn't change who gets eaten. Code: `buildModel()`, `renderModel()`, `startIntro()`, `drawIntro()`, `endIntro()`, `TRAITS`.
