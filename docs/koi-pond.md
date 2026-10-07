@@ -54,6 +54,10 @@ Everything is in `index.html`, inside `tools.koi`:
 | Ending | `finish()` |
 | Link parsing (shared with Space battle) | `parseLink()` |
 
+## Opening screen
+
+Before play, the pond shows a title screen: the word KOI in big low-poly 3D letters (white K, red eight-sided O, gold I), rendered at 120 × 120 pixels and scaled up, swaying gently above a green perspective grid. Underneath it says how many names and koi there are, with a blinking "press play". Code: `TITLE`, `prism()`, `drawTitle()`.
+
 ## Fish introductions
 
 After Play is pressed, and before the countdown, each koi gets a 2.6-second turn on a retro character-select screen:

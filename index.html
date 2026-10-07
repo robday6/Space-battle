@@ -1135,12 +1135,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         paused = true; overlay.hidden = true; act(''); $('#krules').innerHTML = ''; $('#kskip').hidden = false;
       };
       const endIntro = () => { intro = null; $('#kskip').hidden = true; hctx.clearRect(0, 0, W, H); draw(); countdown(); };
-      const renderModel = (m, yaw, pitch, scale, bob) => {
-        const o = octx; o.clearRect(0, 0, PX, PX);
+      const renderModel = (m, yaw, pitch, scale, bob, o = octx, PX = 72, shadow = true) => {
+        o.clearRect(0, 0, PX, PX);
         const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
         const P = m.verts.map(([x, y, z]) => { const x1 = x * cy + z * sy, z1 = -x * sy + z * cy; const y2 = y * cp - z1 * sp, z2 = y * sp + z1 * cp; return [PX / 2 + x1 * scale, PX * .48 - y2 * scale + bob, z2]; });
         // ground shadow
-        o.fillStyle = 'rgba(0,0,0,.45)'; o.beginPath(); o.ellipse(PX / 2, PX * .78, 26 * scale * (.55 + .45 * Math.abs(cy)), 4 * scale, 0, 0, TAU); o.fill();
+        if (shadow) { o.fillStyle = 'rgba(0,0,0,.45)'; o.beginPath(); o.ellipse(PX / 2, PX * .78, 26 * scale * (.55 + .45 * Math.abs(cy)), 4 * scale, 0, 0, TAU); o.fill(); }
         const L = [.3, .8, .5], ll = Math.hypot(...L);
         const list = m.faces.map(f => { const p = f.v.map(i => P[i]); const z = p.reduce((s, q) => s + q[2], 0) / p.length;
           const ax = p[1][0] - p[0][0], ay = p[1][1] - p[0][1], az = p[1][2] - p[0][2], bx = p[2][0] - p[0][0], by = p[2][1] - p[0][1], bz = p[2][2] - p[0][2];
@@ -1153,6 +1153,44 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           const col = shade(q.f.rgb, k); o.fillStyle = col; o.strokeStyle = col; o.lineWidth = .7; o.beginPath(); o.moveTo(q.p[0][0], q.p[0][1]); for (const v of q.p.slice(1)) o.lineTo(v[0], v[1]); o.closePath(); o.fill(); o.stroke();
         }
       };
+      // ---- opening screen: big low-poly KOI letters
+      const prism = (pts, d, rgb, verts, faces) => {
+        const s = verts.length, n = pts.length;
+        for (const [x, y] of pts) verts.push([x, y, d / 2]);
+        for (const [x, y] of pts) verts.push([x, y, -d / 2]);
+        faces.push({v: pts.map((_, i) => s + i), rgb, two: true});
+        faces.push({v: pts.map((_, i) => s + n + (n - 1 - i)), rgb, two: true});
+        for (let i = 0; i < n; i++) { const j = (i + 1) % n; faces.push({v: [s + i, s + j, s + n + j, s + n + i], rgb, two: true}); }
+      };
+      const TITLE = (() => {
+        const verts = [], faces = [], D = 9, wh = hexRgb('#EFE8DA'), rd = hexRgb('#D9472B'), gd = hexRgb('#E3A43A');
+        const k = -47; // K
+        prism([[k, -16], [k + 8, -16], [k + 8, 16], [k, 16]], D, wh, verts, faces);
+        prism([[k + 8, -2], [k + 15, -2], [k + 27, 16], [k + 19, 16]], D, wh, verts, faces);
+        prism([[k + 19, -16], [k + 27, -16], [k + 15, 3], [k + 8, 3]], D, wh, verts, faces);
+        const ox = 3, R1 = 16, R2 = 8, N = 8; // O as an eight-sided ring
+        for (let i = 0; i < N; i++) { const a0 = (i + .5) / N * TAU, a1 = (i + 1.5) / N * TAU;
+          prism([[ox + Math.cos(a0) * R1, Math.sin(a0) * R1], [ox + Math.cos(a1) * R1, Math.sin(a1) * R1], [ox + Math.cos(a1) * R2, Math.sin(a1) * R2], [ox + Math.cos(a0) * R2, Math.sin(a0) * R2]], D, rd, verts, faces); }
+        prism([[28, -16], [37, -16], [37, 16], [28, 16]], D, gd, verts, faces); // I
+        return {verts, faces};
+      })();
+      const TS = 120, tOff = document.createElement('canvas'); tOff.width = TS; tOff.height = TS; const tctx = tOff.getContext('2d');
+      const drawGrid = c => {
+        c.strokeStyle = '#123A2C'; c.lineWidth = 4;
+        for (let g = 0; g <= 10; g++) { const y = CY + 120 + g * g * 5; c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+        for (let g = -8; g <= 8; g++) { c.beginPath(); c.moveTo(CX + g * 40, CY + 120); c.lineTo(CX + g * 200, H); c.stroke(); }
+      };
+      const drawTitle = now => {
+        const c = lctx, tt = now / 1000;
+        c.fillStyle = '#09060D'; c.fillRect(0, 0, W, H); drawGrid(c);
+        renderModel(TITLE, Math.sin(tt * .9) * .6, -.28 + Math.sin(tt * .6) * .12, 1.12, Math.round(Math.sin(tt * 2) * 1.5), tctx, TS, false);
+        c.imageSmoothingEnabled = false; c.drawImage(tOff, CX - 350, CY - 470, 700, 700); c.imageSmoothingEnabled = true;
+        const h = hctx; h.clearRect(0, 0, W, H); h.textAlign = 'center'; h.textBaseline = 'alphabetic';
+        h.font = '400 22px "IBM Plex Mono", ui-monospace, monospace'; h.fillStyle = '#2FA52F';
+        h.fillText(`${names.length} names · ${koi.length} koi · 1 chosen one`, CX, CY + 40);
+        if (Math.floor(now / 600) % 2) { h.fillStyle = '#4FE34F'; h.fillText('press play', CX, CY + 90); }
+        hud.textContent = '';
+      };
       const drawIntro = (now, real) => {
         intro.t += real;
         const i = Math.floor(intro.t / PER);
@@ -1160,9 +1198,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         const tt = intro.t - i * PER, u = tt / PER, fi = intro.fish[i], c = lctx;
         c.fillStyle = '#09060D'; c.fillRect(0, 0, W, H);
         // pixel floor grid, retro select-screen style
-        c.strokeStyle = '#123A2C'; c.lineWidth = 4;
-        for (let g = 0; g <= 10; g++) { const y = CY + 120 + g * g * 5; c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
-        for (let g = -8; g <= 8; g++) { c.beginPath(); c.moveTo(CX + g * 40, CY + 120); c.lineTo(CX + g * 200, H); c.stroke(); }
+        drawGrid(c);
         const pop = Math.min(1, tt / .18), out = Math.max(0, (u - .9) / .1), scl = .92 * (pop < 1 ? Math.round(pop * 4) / 4 : 1) * (1 - out);
         if (scl > 0) {
           renderModel(fi.model, tt * TAU / 2.2 + .6, -.42, scl, Math.round(Math.sin(tt * 4) * 1.5));
@@ -1189,7 +1225,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       };
       const play = () => { cancelAnimationFrame(raf); clearTimeout(timer); stopConfetti(); setup(); startIntro(); running = true; last = performance.now(); raf = requestAnimationFrame(loop); };
       // ambient idle animation so the pond looks alive before play
-      const idleLoop = now => { if (running) return; for (const k of koi) k.phase += .02; draw(); raf = requestAnimationFrame(idleLoop); };
+      const idleLoop = now => { if (running) return; drawTitle(now); raf = requestAnimationFrame(idleLoop); };
       // full screen
       const isFull = () => document.fullscreenElement === wrapEl || document.webkitFullscreenElement === wrapEl || wrapEl.classList.contains('theatre');
       const enterFull = () => {
